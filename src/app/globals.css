@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+/*
+  Dr Diet brand theme — Tailwind CSS v4 (CSS-first, no tailwind.config.ts).
+  Tokens are the fixed brand system from docs/03-DESIGN-SYSTEM.md.
+  Do NOT introduce the old prototype's emerald/orange (#1F8A5C / #F2A93B) palette.
+*/
+
+@theme {
+  /* Brand palette (from Brand Guideline Dr Diet.pdf) */
+  --color-primary: #434e3d; /* olive green — logo, headings, primary buttons, dark text */
+  --color-primary-light: #f5ede1; /* warm cream — page/section backgrounds, cards */
+  --color-neutral: #a5af9b; /* sage — secondary text, borders, disabled/muted UI */
+  --color-accent: #e2e573; /* chartreuse — highlights, badges, active/selected, CTAs */
+
+  /* Pragmatic in-family extensions (no generic red/green — see design system doc) */
+  --color-danger: #b3462c; /* desaturated brick — real errors only, used sparingly */
+  --color-success: #9ba23c; /* deeper olive-gold — confirmation, distinct from accent */
+
+  /* Semantic surfaces & text */
+  --color-bg: #f5ede1; /* page canvas (== primary-light) */
+  --color-surface: #ffffff; /* raised cards/sheets */
+  --color-muted: #7a8570; /* muted/secondary text that still passes AA on cream */
+  --color-border: #dcd6c8; /* hairline borders */
+
+  /* Interactive shades (hover/active) derived from the brand hues */
+  --color-primary-hover: #363f31; /* darker olive for primary button hover */
+  --color-accent-hover: #d3d75d; /* deeper chartreuse for accent button hover */
+
+  /* Brand corner radii (12–20px friendly, matching the rounded logo mark) */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+
+  /* Elevation — kept minimal; brand favors hairline borders over glossy shadows.
+     Reserve shadows for overlays that must float above content. */
+  --shadow-sheet: 0 -10px 40px -12px rgba(67, 78, 61, 0.28);
+  --shadow-pop: 0 8px 30px -12px rgba(67, 78, 61, 0.25);
+}
+
+@theme inline {
+  /* Fonts wired from next/font/google in src/app/layout.tsx */
+  --font-primary: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
+  --font-accent: var(--font-baloo), "Baloo 2", cursive;
+}
+
+/* Base document styles — brand is a fixed warm/light palette, so no dark variant. */
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-primary);
+  font-family: var(--font-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Consistent, brand-tinted keyboard focus ring for all interactive elements. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}

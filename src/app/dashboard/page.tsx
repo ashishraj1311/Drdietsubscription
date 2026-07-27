@@ -3,12 +3,19 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
+  MessageCircle,
+  ReceiptText,
+  TrendingUp,
+  UtensilsCrossed,
+} from "lucide-react";
+import {
   Badge,
   BottomSheet,
   Button,
   Card,
   CardBody,
   Chip,
+  PageLoader,
 } from "@/components/ui";
 import { useDashboardData } from "@/lib/hooks/useDashboardData";
 import { api } from "@/lib/mock/api";
@@ -25,13 +32,13 @@ export default function DashboardHome() {
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
 
   if (loading) {
-    return <p className="py-10 text-center text-sm text-muted">Loading your dashboard…</p>;
+    return <PageLoader label="Loading your dashboard…" />;
   }
 
   if (!subscription) {
     return (
       <div className="rounded-lg border border-border bg-surface p-10 text-center">
-        <p className="text-4xl" aria-hidden>🍽️</p>
+        <UtensilsCrossed size={40} className="mx-auto text-neutral" aria-hidden />
         <h1 className="mt-3 text-xl font-bold">No active plan yet</h1>
         <p className="mt-1 text-sm text-muted">
           Build your first plan and your deliveries will show up here.
@@ -152,9 +159,9 @@ export default function DashboardHome() {
 
       {/* Helpful links */}
       <div className="grid gap-3 sm:grid-cols-3">
-        <LinkCard href="/dashboard/progress" icon="📈" title="Track progress" sub="See goal progress over time" />
-        <LinkCard href="/dashboard/invoices" icon="🧾" title="Invoices" sub="Download your ₹ invoices" />
-        <LinkCard href="/dashboard/support" icon="💬" title="Support" sub="We're here to help" />
+        <LinkCard href="/dashboard/progress" icon={<TrendingUp size={22} />} title="Track progress" sub="See goal progress over time" />
+        <LinkCard href="/dashboard/invoices" icon={<ReceiptText size={22} />} title="Invoices" sub="Download your ₹ invoices" />
+        <LinkCard href="/dashboard/support" icon={<MessageCircle size={22} />} title="Support" sub="We're here to help" />
       </div>
 
       {/* Change time sheet */}
@@ -227,12 +234,24 @@ function OrderRow({
   );
 }
 
-function LinkCard({ href, icon, title, sub }: { href: string; icon: string; title: string; sub: string }) {
+function LinkCard({
+  href,
+  icon,
+  title,
+  sub,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  title: string;
+  sub: string;
+}) {
   return (
     <Link href={href}>
       <Card interactive>
         <CardBody>
-          <div className="text-2xl" aria-hidden>{icon}</div>
+          <div className="text-primary" aria-hidden>
+            {icon}
+          </div>
           <p className="mt-2 font-bold">{title}</p>
           <p className="text-xs text-muted">{sub}</p>
         </CardBody>

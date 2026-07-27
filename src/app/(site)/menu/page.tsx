@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { UtensilsCrossed } from "lucide-react";
 import { Button, Chip } from "@/components/ui";
 import { MealCard } from "@/components/shared/MealCard";
 import { getMeals } from "@/lib/mock/catalog";
@@ -68,9 +69,7 @@ export default function MenuPage() {
 
       {meals.length === 0 ? (
         <div className="mt-4 rounded-lg border border-border bg-surface p-10 text-center">
-          <p className="text-4xl" aria-hidden>
-            🍽️
-          </p>
+          <UtensilsCrossed size={40} className="mx-auto text-neutral" aria-hidden />
           <p className="mt-3 font-semibold">Nothing on the menu for that combo</p>
           <p className="mt-1 text-sm text-muted">Try a different diet or meal filter.</p>
         </div>

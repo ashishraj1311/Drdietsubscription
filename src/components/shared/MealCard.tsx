@@ -1,12 +1,18 @@
 import { Card } from "@/components/ui";
-import { AllergenTags, EmojiThumb } from "./bits";
+import { AllergenTags } from "./bits";
+import { Thumb } from "./Thumb";
 import { dietLabel, proteinLabel, slotLabel } from "@/lib/format";
 import type { Meal } from "@/lib/types";
 
 export function MealCard({ meal }: { meal: Meal }) {
   return (
     <Card tone="canvas" className="flex flex-col">
-      <EmojiThumb emoji={meal.emoji} className="h-28 w-full" />
+      <Thumb
+        src={`/meals/${meal.id}.jpg`}
+        emoji={meal.emoji}
+        alt={meal.name}
+        className="h-28 w-full"
+      />
       <div className="flex flex-1 flex-col p-4">
         <div className="flex items-start justify-between gap-2">
           <h3 className="text-base font-bold leading-tight">{meal.name}</h3>

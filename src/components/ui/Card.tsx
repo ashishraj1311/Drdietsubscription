@@ -24,13 +24,14 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-lg border overflow-hidden",
-        tone === "surface" ? "bg-surface" : "bg-primary-light",
+        "rounded-lg border overflow-hidden transition-all duration-200",
+        // white cards lift off the cream canvas; cream/canvas cards stay flat
+        tone === "surface" ? "bg-surface shadow-[var(--shadow-card)]" : "bg-primary-light",
         selected
           ? "border-primary ring-2 ring-accent"
           : "border-border",
         interactive &&
-          "cursor-pointer transition-colors hover:border-neutral focus-visible:border-primary",
+          "cursor-pointer hover:-translate-y-0.5 hover:border-neutral hover:shadow-[var(--shadow-card-hover)] focus-visible:border-primary",
         className,
       )}
       {...props}

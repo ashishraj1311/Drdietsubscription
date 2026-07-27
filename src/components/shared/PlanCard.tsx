@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Badge, Card } from "@/components/ui";
-import { EmojiThumb, RatingStars } from "./bits";
+import { RatingStars } from "./bits";
+import { Thumb } from "./Thumb";
 import { dietLabel, goalLabel, inr } from "@/lib/format";
 import type { Plan } from "@/lib/types";
 
@@ -9,7 +10,12 @@ export function PlanCard({ plan }: { plan: Plan }) {
     <Card interactive className="flex h-full flex-col">
       <Link href={`/plans/${plan.id}`} className="flex h-full flex-col">
         <div className="relative">
-          <EmojiThumb emoji={plan.emoji} className="h-32 w-full" />
+          <Thumb
+            src={`/plans/${plan.id}.jpg`}
+            emoji={plan.emoji}
+            alt={plan.name}
+            className="h-32 w-full"
+          />
           <div className="absolute left-3 top-3 flex gap-1.5">
             <Badge variant="accent" size="sm">
               {dietLabel(plan.diet_type)}

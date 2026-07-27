@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { CircleCheckBig, HelpCircle, Phone } from "lucide-react";
 import { Button, Card, CardBody, Select } from "@/components/ui";
 
 export default function SupportPage() {
@@ -19,7 +20,7 @@ export default function SupportPage() {
       <div className="grid gap-4 sm:grid-cols-2">
         <Card tone="canvas">
           <CardBody>
-            <div className="text-2xl" aria-hidden>📞</div>
+            <Phone size={22} className="text-primary" aria-hidden />
             <p className="mt-2 font-bold">Book a free call</p>
             <p className="text-xs text-muted">A 10-minute chat with our nutrition team.</p>
             <Button
@@ -34,7 +35,7 @@ export default function SupportPage() {
         </Card>
         <Card tone="canvas">
           <CardBody>
-            <div className="text-2xl" aria-hidden>❓</div>
+            <HelpCircle size={22} className="text-primary" aria-hidden />
             <p className="mt-2 font-bold">Browse FAQs</p>
             <p className="text-xs text-muted">Delivery, nutrition, billing and more.</p>
             <Link href="/faqs">
@@ -48,7 +49,7 @@ export default function SupportPage() {
         <CardBody>
           {sent ? (
             <div className="py-6 text-center">
-              <div className="text-4xl" aria-hidden>✅</div>
+              <CircleCheckBig size={36} className="mx-auto text-success" aria-hidden />
               <p className="mt-3 font-bold">Message sent</p>
               <p className="text-sm text-muted">
                 Thanks — we&apos;ll get back to you by email shortly.

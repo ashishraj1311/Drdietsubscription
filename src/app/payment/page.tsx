@@ -3,7 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button, Card, CardBody, Input, Logo } from "@/components/ui";
+import {
+  AlertTriangle,
+  CreditCard,
+  Landmark,
+  Smartphone,
+  Wallet,
+} from "lucide-react";
+import { Button, Card, CardBody, Input, Logo, PageLoader } from "@/components/ui";
 import { useAuth, useBuilder } from "@/lib/providers";
 import { api } from "@/lib/mock/api";
 import { COUPONS } from "@/lib/mock/seed";
@@ -12,11 +19,16 @@ import { inr } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import type { PaymentMethod } from "@/lib/types";
 
-const METHODS: { id: PaymentMethod; label: string; sub: string; emoji: string }[] = [
-  { id: "upi", label: "UPI", sub: "GPay, PhonePe, Paytm & more", emoji: "📲" },
-  { id: "card", label: "Card", sub: "Credit or debit", emoji: "💳" },
-  { id: "netbanking", label: "Netbanking", sub: "All major banks", emoji: "🏦" },
-  { id: "wallet", label: "Wallet", sub: "Paytm, Mobikwik", emoji: "👛" },
+const METHODS: {
+  id: PaymentMethod;
+  label: string;
+  sub: string;
+  icon: React.ReactNode;
+}[] = [
+  { id: "upi", label: "UPI", sub: "GPay, PhonePe, Paytm & more", icon: <Smartphone size={22} /> },
+  { id: "card", label: "Card", sub: "Credit or debit", icon: <CreditCard size={22} /> },
+  { id: "netbanking", label: "Netbanking", sub: "All major banks", icon: <Landmark size={22} /> },
+  { id: "wallet", label: "Wallet", sub: "Paytm, Mobikwik", icon: <Wallet size={22} /> },
 ];
 
 type Phase = "method" | "processing" | "failure";
@@ -67,7 +79,7 @@ export default function PaymentPage() {
   }
 
   if (!builderReady || !authReady || !plan.duration) {
-    return <div className="p-10 text-center text-sm text-muted">Loading…</div>;
+    return <PageLoader />;
   }
 
   return (
@@ -111,8 +123,11 @@ export default function PaymentPage() {
                       : "border-border bg-surface hover:border-neutral",
                   )}
                 >
-                  <span className="text-2xl" aria-hidden>
-                    {m.emoji}
+                  <span
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-neutral/20 text-primary"
+                    aria-hidden
+                  >
+                    {m.icon}
                   </span>
                   <span className="flex-1">
                     <span className="block font-bold text-primary">{m.label}</span>
@@ -194,8 +209,8 @@ function Processing({ amount }: { amount: number }) {
 function Failure({ onRetry, amount }: { onRetry: () => void; amount: number }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-danger/15 text-3xl">
-        ⚠️
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-danger/15 text-danger">
+        <AlertTriangle size={30} aria-hidden />
       </div>
       <h1 className="mt-5 text-2xl font-bold">Payment failed</h1>
       <p className="mt-1 max-w-xs text-sm text-muted">

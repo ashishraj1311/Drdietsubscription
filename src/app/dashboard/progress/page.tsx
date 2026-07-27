@@ -1,18 +1,19 @@
 "use client";
 
-import { Card, CardBody } from "@/components/ui";
+import { TrendingUp } from "lucide-react";
+import { Card, CardBody, PageLoader } from "@/components/ui";
 import { useDashboardData } from "@/lib/hooks/useDashboardData";
 import { goalLabel } from "@/lib/format";
 
 export default function ProgressPage() {
   const { loading, subscription, orders } = useDashboardData();
 
-  if (loading) return <p className="py-10 text-center text-sm text-muted">Loading…</p>;
+  if (loading) return <PageLoader />;
 
   if (!subscription) {
     return (
       <div className="rounded-lg border border-border bg-surface p-10 text-center">
-        <p className="text-4xl" aria-hidden>📈</p>
+        <TrendingUp size={40} className="mx-auto text-neutral" aria-hidden />
         <p className="mt-3 font-semibold">No progress to show yet</p>
         <p className="mt-1 text-sm text-muted">Start a plan to begin tracking.</p>
       </div>

@@ -33,7 +33,7 @@ function Field({
 }
 
 const controlBase =
-  "w-full rounded-md border bg-surface px-3.5 py-2.5 text-sm text-primary placeholder:text-neutral transition-colors focus:outline-none focus-visible:border-primary disabled:opacity-55 disabled:cursor-not-allowed";
+  "w-full rounded-md border bg-surface px-3.5 py-2.5 text-sm text-primary placeholder:text-neutral transition-shadow focus:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/15 disabled:opacity-55 disabled:cursor-not-allowed";
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement>,

@@ -42,3 +42,7 @@ next-env.d.ts
 
 # Nested duplicate clone (not part of this repo)
 /Drdietsubscription/
+
+# Raw source brand assets (large originals — keep out of the repo; optimized
+# web copies go in /public/meals and /public/plans instead)
+/brand_assets/

@@ -1,6 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import {
+  CalendarCheck,
+  CalendarDays,
+  CalendarRange,
+  Check,
+  Drumstick,
+  Dumbbell,
+  Egg,
+  Flame,
+  Gift,
+  Leaf,
+  Salad,
+  Scale,
+  SlidersHorizontal,
+  Sprout,
+  Sun,
+  Sunrise,
+  Sunset,
+  Moon,
+} from "lucide-react";
 import { Badge, Card, CardBody, Chip, Input, Select } from "@/components/ui";
 import { MacroBars } from "@/components/shared/bits";
 import { useBuilder } from "@/lib/providers";
@@ -29,14 +49,14 @@ import type {
 function OptionCard({
   selected,
   onClick,
-  emoji,
+  icon,
   title,
   subtitle,
   badge,
 }: {
   selected: boolean;
   onClick: () => void;
-  emoji: string;
+  icon: React.ReactNode;
   title: string;
   subtitle?: string;
   badge?: string;
@@ -53,8 +73,11 @@ function OptionCard({
           : "border-border bg-surface hover:border-neutral",
       )}
     >
-      <span className="text-3xl" aria-hidden>
-        {emoji}
+      <span
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-neutral/20 text-primary"
+        aria-hidden
+      >
+        {icon}
       </span>
       <span className="flex-1">
         <span className="block font-bold text-primary">{title}</span>
@@ -65,7 +88,7 @@ function OptionCard({
           {badge}
         </Badge>
       )}
-      {selected && <span className="text-primary">✓</span>}
+      {selected && <Check size={18} className="text-primary" aria-hidden />}
     </button>
   );
 }
@@ -73,12 +96,12 @@ function OptionCard({
 /* 1. Goal */
 export function GoalStep() {
   const { plan, setPlan } = useBuilder();
-  const goals: { g: Goal; emoji: string; sub: string }[] = [
-    { g: "lose_weight", emoji: "🔥", sub: "Calorie-smart, high protein" },
-    { g: "gain_muscle", emoji: "💪", sub: "Surplus calories, max protein" },
-    { g: "maintain", emoji: "⚖️", sub: "Stay balanced and consistent" },
-    { g: "eat_healthier", emoji: "🥗", sub: "Cleaner meals, less planning" },
-    { g: "custom", emoji: "🛠️", sub: "Build it entirely your way" },
+  const goals: { g: Goal; icon: React.ReactNode; sub: string }[] = [
+    { g: "lose_weight", icon: <Flame size={22} />, sub: "Calorie-smart, high protein" },
+    { g: "gain_muscle", icon: <Dumbbell size={22} />, sub: "Surplus calories, max protein" },
+    { g: "maintain", icon: <Scale size={22} />, sub: "Stay balanced and consistent" },
+    { g: "eat_healthier", icon: <Salad size={22} />, sub: "Cleaner meals, less planning" },
+    { g: "custom", icon: <SlidersHorizontal size={22} />, sub: "Build it entirely your way" },
   ];
   return (
     <div className="space-y-3">
@@ -87,7 +110,7 @@ export function GoalStep() {
           key={x.g}
           selected={plan.goal === x.g}
           onClick={() => setPlan({ goal: x.g })}
-          emoji={x.emoji}
+          icon={x.icon}
           title={goalLabel(x.g)}
           subtitle={x.sub}
         />
@@ -170,11 +193,11 @@ export function BodyStep() {
 /* 3. Diet preference */
 export function DietStep() {
   const { plan, setPlan } = useBuilder();
-  const diets: { d: DietPreference; emoji: string; sub: string }[] = [
-    { d: "veg", emoji: "🥦", sub: "Paneer, dal, millets — no egg/meat" },
-    { d: "non_veg", emoji: "🍗", sub: "Chicken, fish, egg (no red meat)" },
-    { d: "vegan", emoji: "🌱", sub: "100% plant-based, no dairy/egg" },
-    { d: "eggetarian", emoji: "🥚", sub: "Vegetarian plus eggs" },
+  const diets: { d: DietPreference; icon: React.ReactNode; sub: string }[] = [
+    { d: "veg", icon: <Sprout size={22} />, sub: "Paneer, dal, millets — no egg/meat" },
+    { d: "non_veg", icon: <Drumstick size={22} />, sub: "Chicken, fish, egg (no red meat)" },
+    { d: "vegan", icon: <Leaf size={22} />, sub: "100% plant-based, no dairy/egg" },
+    { d: "eggetarian", icon: <Egg size={22} />, sub: "Vegetarian plus eggs" },
   ];
   return (
     <div className="space-y-3">
@@ -183,7 +206,7 @@ export function DietStep() {
           key={x.d}
           selected={plan.diet === x.d}
           onClick={() => setPlan({ diet: x.d })}
-          emoji={x.emoji}
+          icon={x.icon}
           title={dietLabel(x.d)}
           subtitle={x.sub}
         />
@@ -302,14 +325,16 @@ export function FrequencyStep() {
           key={s}
           selected={plan.mealSlots.includes(s)}
           onClick={() => toggle(s)}
-          emoji={
-            s === "breakfast"
-              ? "🌅"
-              : s === "lunch"
-                ? "☀️"
-                : s === "evening_snack"
-                  ? "🌆"
-                  : "🌙"
+          icon={
+            s === "breakfast" ? (
+              <Sunrise size={22} />
+            ) : s === "lunch" ? (
+              <Sun size={22} />
+            ) : s === "evening_snack" ? (
+              <Sunset size={22} />
+            ) : (
+              <Moon size={22} />
+            )
           }
           title={slotLabel(s)}
           subtitle={perMealLabel(s)}
@@ -327,11 +352,11 @@ export function FrequencyStep() {
 export function DurationStep() {
   const { plan, setPlan } = useBuilder();
   const mealCount = plan.mealSlots.length || 1;
-  const options: { d: DurationType; emoji: string; sub: string; badge?: string }[] = [
-    { d: "trial", emoji: "🎁", sub: "3 meals, single day — taste before you commit", badge: "No auto-renew" },
-    { d: "weekly", emoji: "📅", sub: "6 delivery days (no Sundays)" },
-    { d: "monthly", emoji: "🗓️", sub: "26 delivery days · best value for most", badge: "Save 10%" },
-    { d: "quarterly", emoji: "📆", sub: "78 delivery days · maximum savings", badge: "Save 18%" },
+  const options: { d: DurationType; icon: React.ReactNode; sub: string; badge?: string }[] = [
+    { d: "trial", icon: <Gift size={22} />, sub: "3 meals, single day — taste before you commit", badge: "No auto-renew" },
+    { d: "weekly", icon: <CalendarDays size={22} />, sub: "6 delivery days (no Sundays)" },
+    { d: "monthly", icon: <CalendarRange size={22} />, sub: "26 delivery days · best value for most", badge: "Save 10%" },
+    { d: "quarterly", icon: <CalendarCheck size={22} />, sub: "78 delivery days · maximum savings", badge: "Save 18%" },
   ];
 
   const selectedNames =
@@ -363,8 +388,11 @@ export function DurationStep() {
                 : "border-border bg-surface hover:border-neutral",
             )}
           >
-            <span className="text-3xl" aria-hidden>
-              {o.emoji}
+            <span
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-neutral/20 text-primary"
+              aria-hidden
+            >
+              {o.icon}
             </span>
             <span className="flex-1">
               <span className="flex items-center gap-2 font-bold text-primary">

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Badge, Button, Card, CardBody, Chip, Input } from "@/components/ui";
+import { Badge, Button, Card, CardBody, Chip, Input, PageLoader } from "@/components/ui";
 import { useAuth, useBuilder } from "@/lib/providers";
 import { AddressFields, emptyAddress } from "./AddressFields";
 import {
@@ -96,9 +96,7 @@ export default function CheckoutPage() {
     !!contactOk && addressesOk && !!checkout.delivery.slot && !!checkout.delivery.startDate;
 
   if (!builderReady || !authReady || !plan.duration) {
-    return (
-      <div className="p-10 text-center text-sm text-muted">Loading checkout…</div>
-    );
+    return <PageLoader label="Loading checkout…" />;
   }
 
   const startDateValue = checkout.delivery.startDate.slice(0, 10);
@@ -301,7 +299,7 @@ export default function CheckoutPage() {
       </Section>
 
       {/* Sticky continue */}
-      <div className="fixed inset-x-0 bottom-0 border-t border-border bg-surface">
+      <div className="fixed inset-x-0 bottom-0 border-t border-border bg-surface shadow-[var(--shadow-bar)]">
         <div className="mx-auto flex w-full max-w-lg items-center gap-3 px-4 py-3">
           <div className="flex-1">
             <p className="text-xs text-muted">Starting total</p>

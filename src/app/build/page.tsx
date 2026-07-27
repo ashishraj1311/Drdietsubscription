@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, Logo, SegmentedProgress } from "@/components/ui";
+import { Button, Logo, PageLoader, SegmentedProgress } from "@/components/ui";
 import { useBuilder } from "@/lib/providers";
 import { getPlan } from "@/lib/mock/catalog";
 import type { PlanBuilderState } from "@/lib/types";
@@ -42,7 +42,7 @@ const STEPS: Step[] = [
 
 export default function BuildPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-sm text-muted">Loading…</div>}>
+    <Suspense fallback={<PageLoader />}>
       <Wizard />
     </Suspense>
   );
@@ -140,7 +140,7 @@ function Wizard() {
       </main>
 
       {/* Bottom nav */}
-      <div className="sticky bottom-0 border-t border-border bg-surface">
+      <div className="sticky bottom-0 border-t border-border bg-surface shadow-[var(--shadow-bar)]">
         <div className="mx-auto flex w-full max-w-lg items-center gap-3 px-4 py-3">
           <Button variant="ghost" onClick={back}>
             {index === 0 ? "Cancel" : "← Back"}

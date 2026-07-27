@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Badge, Button, Card, CardBody, Input } from "@/components/ui";
+import { Badge, Button, Card, CardBody, Input, PageLoader } from "@/components/ui";
 import { useAuth } from "@/lib/providers";
 import { useDashboardData } from "@/lib/hooks/useDashboardData";
 
@@ -22,7 +22,7 @@ export default function ProfilePage() {
   }, [user]);
 
   if (!hydrated || !user) {
-    return <p className="py-10 text-center text-sm text-muted">Loading…</p>;
+    return <PageLoader />;
   }
 
   function deleteAccount() {

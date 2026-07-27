@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { SearchX } from "lucide-react";
 import { Button, Chip } from "@/components/ui";
 import { PlanCard } from "@/components/shared/PlanCard";
 import { getPlans } from "@/lib/mock/catalog";
@@ -65,9 +66,7 @@ export default function ExplorePage() {
 
       {plans.length === 0 ? (
         <div className="rounded-lg border border-border bg-surface p-10 text-center">
-          <p className="text-4xl" aria-hidden>
-            🍽️
-          </p>
+          <SearchX size={40} className="mx-auto text-neutral" aria-hidden />
           <p className="mt-3 font-semibold">No plans match those filters</p>
           <p className="mt-1 text-sm text-muted">
             Try clearing a filter — or build a fully custom plan instead.

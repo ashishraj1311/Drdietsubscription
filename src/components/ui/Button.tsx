@@ -12,16 +12,16 @@ import { cn } from "@/lib/cn";
  *  - danger  : brick fill                    (destructive, used sparingly)
  */
 const button = cva(
-  "inline-flex items-center justify-center gap-2 font-semibold whitespace-nowrap rounded-md transition-colors select-none disabled:pointer-events-none disabled:opacity-55",
+  "inline-flex items-center justify-center gap-2 font-semibold whitespace-nowrap rounded-md transition-all duration-150 select-none active:scale-[0.98] disabled:pointer-events-none disabled:opacity-55 disabled:active:scale-100",
   {
     variants: {
       variant: {
-        primary: "bg-primary text-primary-light hover:bg-primary-hover",
-        accent: "bg-accent text-primary hover:bg-accent-hover",
+        primary: "bg-primary text-primary-light shadow-sm hover:bg-primary-hover",
+        accent: "bg-accent text-primary shadow-sm hover:bg-accent-hover",
         outline:
           "border border-primary text-primary bg-transparent hover:bg-primary/5",
         ghost: "text-primary bg-transparent hover:bg-primary/5",
-        danger: "bg-danger text-primary-light hover:brightness-95",
+        danger: "bg-danger text-primary-light shadow-sm hover:brightness-95",
       },
       size: {
         sm: "h-9 px-3.5 text-xs",

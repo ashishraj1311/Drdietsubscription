@@ -14,13 +14,13 @@
   --color-accent: #e2e573; /* chartreuse — highlights, badges, active/selected, CTAs */
 
   /* Pragmatic in-family extensions (no generic red/green — see design system doc) */
-  --color-danger: #b3462c; /* desaturated brick — real errors only, used sparingly */
-  --color-success: #9ba23c; /* deeper olive-gold — confirmation, distinct from accent */
+  --color-danger: #b3462c; /* desaturated brick — real errors only (AA: 4.7 w/ cream text) */
+  --color-success: #53702f; /* deep leaf green — confirmation states (AA: 4.9 w/ cream text) */
 
   /* Semantic surfaces & text */
   --color-bg: #f5ede1; /* page canvas (== primary-light) */
   --color-surface: #ffffff; /* raised cards/sheets */
-  --color-muted: #7a8570; /* muted/secondary text that still passes AA on cream */
+  --color-muted: #5f6a56; /* muted/secondary text — darkened to pass AA (4.9) on cream */
   --color-border: #dcd6c8; /* hairline borders */
 
   /* Interactive shades (hover/active) derived from the brand hues */
@@ -32,8 +32,11 @@
   --radius-md: 14px;
   --radius-lg: 20px;
 
-  /* Elevation — kept minimal; brand favors hairline borders over glossy shadows.
-     Reserve shadows for overlays that must float above content. */
+  /* Elevation — soft, warm-tinted lifts (keeps the earthy feel, adds depth so
+     white cards separate from the cream canvas). */
+  --shadow-card: 0 1px 2px rgba(67, 78, 61, 0.05), 0 6px 16px -10px rgba(67, 78, 61, 0.14);
+  --shadow-card-hover: 0 2px 6px rgba(67, 78, 61, 0.08), 0 14px 26px -12px rgba(67, 78, 61, 0.2);
+  --shadow-bar: 0 -8px 24px -14px rgba(67, 78, 61, 0.22);
   --shadow-sheet: 0 -10px 40px -12px rgba(67, 78, 61, 0.28);
   --shadow-pop: 0 8px 30px -12px rgba(67, 78, 61, 0.25);
 }

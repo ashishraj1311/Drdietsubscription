@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Badge, Button, Card, CardBody, Logo } from "@/components/ui";
+import { CircleCheckBig } from "lucide-react";
+import { Badge, Button, Card, CardBody, Logo, PageLoader } from "@/components/ui";
 import { useAuth, useBuilder } from "@/lib/providers";
 import { api } from "@/lib/mock/api";
 import { billingSentence } from "@/lib/pricing";
@@ -24,7 +25,7 @@ export default function ConfirmationPage() {
   }, [hydrated, user, resetAll]);
 
   if (sub === undefined) {
-    return <div className="p-10 text-center text-sm text-muted">Loading…</div>;
+    return <PageLoader />;
   }
 
   if (!sub) {
@@ -45,8 +46,8 @@ export default function ConfirmationPage() {
       </div>
 
       <div className="flex flex-col items-center text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-success/20 text-4xl">
-          ✅
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-success/20 text-success">
+          <CircleCheckBig size={40} aria-hidden />
         </div>
         <h1 className="mt-5 text-3xl font-bold">You&apos;re all set!</h1>
         <p className="mt-2 max-w-sm text-sm text-muted">

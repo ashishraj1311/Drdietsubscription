@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Badge, Card, CardBody } from "@/components/ui";
+import { Badge, Card, CardBody, PageLoader } from "@/components/ui";
 import { PlanCard } from "@/components/shared/PlanCard";
 import { useDashboardData } from "@/lib/hooks/useDashboardData";
 import { getPlans } from "@/lib/mock/catalog";
@@ -11,7 +11,7 @@ export default function UpgradePage() {
   const { loading, subscription } = useDashboardData();
   const plans = getPlans().slice(0, 3);
 
-  if (loading) return <p className="py-10 text-center text-sm text-muted">Loading…</p>;
+  if (loading) return <PageLoader />;
 
   return (
     <div className="space-y-6">

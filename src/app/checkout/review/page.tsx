@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Badge, Button, Card, CardBody } from "@/components/ui";
+import { Badge, Button, Card, CardBody, PageLoader } from "@/components/ui";
 import { useBuilder } from "@/lib/providers";
 import { COUPONS } from "@/lib/mock/seed";
 import { billingSentence, computePrice } from "@/lib/pricing";
@@ -35,7 +35,7 @@ export default function OrderReviewPage() {
   );
 
   if (!hydrated || !plan.duration) {
-    return <div className="p-10 text-center text-sm text-muted">Loading…</div>;
+    return <PageLoader />;
   }
 
   const addr =
@@ -136,7 +136,7 @@ export default function OrderReviewPage() {
         </CardBody>
       </Card>
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-border bg-surface">
+      <div className="fixed inset-x-0 bottom-0 border-t border-border bg-surface shadow-[var(--shadow-bar)]">
         <div className="mx-auto flex w-full max-w-lg items-center gap-3 px-4 py-3">
           <Button variant="ghost" onClick={() => router.push("/checkout")}>
             ← Edit

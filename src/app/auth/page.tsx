@@ -2,13 +2,13 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, Card, CardBody, Input } from "@/components/ui";
+import { Button, Card, CardBody, Input, PageLoader } from "@/components/ui";
 import { TrustBadges } from "@/components/shared/bits";
 import { useAuth } from "@/lib/providers";
 
 export default function AuthPage() {
   return (
-    <Suspense fallback={<div className="text-sm text-muted">Loading…</div>}>
+    <Suspense fallback={<PageLoader />}>
       <AuthClient />
     </Suspense>
   );

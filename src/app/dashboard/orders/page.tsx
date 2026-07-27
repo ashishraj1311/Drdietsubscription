@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Badge, Button, Card, CardBody } from "@/components/ui";
+import { PackageOpen } from "lucide-react";
+import { Badge, Button, Card, CardBody, PageLoader } from "@/components/ui";
 import { useDashboardData } from "@/lib/hooks/useDashboardData";
 import { shortDate, slotLabel } from "@/lib/format";
 import type { OrderStatus } from "@/lib/types";
@@ -16,7 +17,7 @@ const STATUS_VARIANT: Record<OrderStatus, "success" | "surface" | "neutral" | "d
 export default function OrdersPage() {
   const { loading, subscription, orders } = useDashboardData();
 
-  if (loading) return <p className="py-10 text-center text-sm text-muted">Loading…</p>;
+  if (loading) return <PageLoader />;
 
   if (!subscription) {
     return (
@@ -73,7 +74,7 @@ export default function OrdersPage() {
 function EmptyState() {
   return (
     <div className="rounded-lg border border-border bg-surface p-10 text-center">
-      <p className="text-4xl" aria-hidden>📦</p>
+      <PackageOpen size={40} className="mx-auto text-neutral" aria-hidden />
       <p className="mt-3 font-semibold">No orders yet</p>
       <Link href="/build" className="mt-4 inline-block">
         <Button>Build a plan</Button>

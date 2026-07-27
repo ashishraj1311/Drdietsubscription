@@ -32,9 +32,13 @@ export function SiteHeader() {
             <Link
               key={n.href}
               href={n.href}
+              aria-current={pathname === n.href ? "page" : undefined}
               className={cn(
-                "text-sm font-medium transition-colors hover:text-primary",
-                pathname === n.href ? "text-primary" : "text-muted",
+                "relative py-1 text-sm font-medium transition-colors hover:text-primary",
+                "after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-accent after:transition-transform after:duration-200",
+                pathname === n.href
+                  ? "text-primary after:scale-x-100"
+                  : "text-muted after:scale-x-0 hover:after:scale-x-100",
               )}
             >
               {n.label}

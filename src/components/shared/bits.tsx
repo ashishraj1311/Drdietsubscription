@@ -1,3 +1,4 @@
+import { MapPin, Salad, ShieldCheck, Star, Truck } from "lucide-react";
 import { getAllergen } from "@/lib/mock/catalog";
 import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui";
@@ -16,9 +17,16 @@ export function RatingStars({
   const full = Math.round(rating);
   return (
     <span className={cn("inline-flex items-center gap-1 text-sm", className)}>
-      <span aria-hidden className="text-accent">
-        {"★".repeat(full)}
-        <span className="text-neutral/50">{"★".repeat(5 - full)}</span>
+      <span className="inline-flex items-center" aria-hidden>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Star
+            key={i}
+            size={14}
+            className={
+              i < full ? "fill-accent text-accent" : "fill-none text-neutral/50"
+            }
+          />
+        ))}
       </span>
       <span className="font-semibold text-primary">{rating.toFixed(1)}</span>
       {count != null && <span className="text-muted">({count})</span>}
@@ -79,34 +87,52 @@ export function AllergenTags({ ids }: { ids: string[] }) {
 /** Trust badges for the home / value-prop screens. */
 export function TrustBadges({ className }: { className?: string }) {
   const items = [
-    { icon: "🛡️", label: "FSSAI certified" },
-    { icon: "🥗", label: "Dietitian-designed" },
-    { icon: "🚚", label: "Fresh daily delivery" },
-    { icon: "🇮🇳", label: "Made for India" },
+    { Icon: ShieldCheck, label: "FSSAI certified" },
+    { Icon: Salad, label: "Dietitian-designed" },
+    { Icon: Truck, label: "Fresh daily delivery" },
+    { Icon: MapPin, label: "Made for India" },
   ];
   return (
     <div className={cn("flex flex-wrap gap-2", className)}>
-      {items.map((i) => (
-        <Badge key={i.label} variant="outline">
-          <span aria-hidden>{i.icon}</span> {i.label}
+      {items.map(({ Icon, label }) => (
+        <Badge key={label} variant="outline">
+          <Icon size={13} className="text-primary" aria-hidden /> {label}
         </Badge>
       ))}
     </div>
   );
 }
 
-/** Big emoji "photo" stand-in used across meal/plan cards. */
+/**
+ * "Photo" tile used across meal/plan cards. Renders a real image when `src` is
+ * provided, otherwise a soft branded gradient with the dish emoji as a stand-in
+ * (swap in food photography by passing `src`).
+ */
 export function EmojiThumb({
   emoji,
+  src,
+  alt,
   className,
 }: {
   emoji: string;
+  src?: string;
+  alt?: string;
   className?: string;
 }) {
+  if (src) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt={alt ?? ""}
+        className={cn("object-cover", className)}
+      />
+    );
+  }
   return (
     <div
       className={cn(
-        "flex items-center justify-center bg-neutral/20 text-5xl select-none",
+        "flex items-center justify-center bg-gradient-to-br from-primary-light to-neutral/30 text-5xl select-none",
         className,
       )}
       aria-hidden

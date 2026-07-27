@@ -3,16 +3,17 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { House, Package, ReceiptText, TrendingUp, User } from "lucide-react";
 import { Logo } from "@/components/ui";
 import { useAuth } from "@/lib/providers";
 import { cn } from "@/lib/cn";
 
 const TABS = [
-  { href: "/dashboard", label: "Home", icon: "🏠" },
-  { href: "/dashboard/orders", label: "Orders", icon: "📦" },
-  { href: "/dashboard/progress", label: "Progress", icon: "📈" },
-  { href: "/dashboard/invoices", label: "Invoices", icon: "🧾" },
-  { href: "/dashboard/profile", label: "Profile", icon: "👤" },
+  { href: "/dashboard", label: "Home", Icon: House },
+  { href: "/dashboard/orders", label: "Orders", Icon: Package },
+  { href: "/dashboard/progress", label: "Progress", Icon: TrendingUp },
+  { href: "/dashboard/invoices", label: "Invoices", Icon: ReceiptText },
+  { href: "/dashboard/profile", label: "Profile", Icon: User },
 ];
 
 export default function DashboardLayout({
@@ -73,9 +74,7 @@ export default function DashboardLayout({
               pathname === t.href ? "text-primary" : "text-muted",
             )}
           >
-            <span aria-hidden className="text-base">
-              {t.icon}
-            </span>
+            <t.Icon size={18} aria-hidden />
             {t.label}
           </Link>
         ))}

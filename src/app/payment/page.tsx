@@ -74,7 +74,7 @@ export default function PaymentPage() {
     <div className="flex min-h-full flex-col">
       <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-lg items-center justify-between px-4">
-          <Logo variant="symbol" symbolClassName="h-7 w-7" />
+          <Logo variant="symbol" symbolClassName="h-7 w-auto" />
           <span className="text-sm font-semibold text-primary">Payment</span>
           <span className="text-sm font-bold">{inr(price.totalInr)}</span>
         </div>

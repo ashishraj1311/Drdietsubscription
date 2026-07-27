@@ -107,7 +107,7 @@ function Wizard() {
       <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-lg items-center justify-between px-4">
           <Link href="/" aria-label="Dr Diet home">
-            <Logo variant="symbol" symbolClassName="h-7 w-7" />
+            <Logo variant="symbol" symbolClassName="h-7 w-auto" />
           </Link>
           <span className="text-sm font-semibold text-primary">Build my plan</span>
           <Link href="/" className="text-sm text-muted hover:text-primary">

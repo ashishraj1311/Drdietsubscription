@@ -105,17 +105,13 @@ export default function StyleGuide() {
       <div className="space-y-10">
         {/* Logo */}
         <Section id="logo" title="Logo">
-          <p className="text-xs text-danger">
-            ⚠ The symbol is a placeholder interpretation — swap with the official
-            exported vector from the brand PDF.
-          </p>
           <div className="flex flex-wrap items-end gap-10">
             <div className="text-center">
               <Logo variant="full" className="text-2xl" />
               <p className="mt-3 text-xs text-muted">Full lockup</p>
             </div>
             <div className="text-center">
-              <LogoSymbol className="h-14 w-14" />
+              <LogoSymbol className="h-14 w-auto" />
               <p className="mt-3 text-xs text-muted">Symbol</p>
             </div>
             <div className="text-center">

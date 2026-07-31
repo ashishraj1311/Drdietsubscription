@@ -20,14 +20,14 @@ import {
 /* ------------------------------------------------------------------ */
 
 const palette = [
-  { name: "Primary", token: "primary", hex: "#434E3D", on: "text-primary-light" },
-  { name: "Primary Light", token: "primary-light", hex: "#F5EDE1", on: "text-primary" },
-  { name: "Neutral", token: "neutral", hex: "#A5AF9B", on: "text-primary" },
-  { name: "Accent", token: "accent", hex: "#E2E573", on: "text-primary" },
-  { name: "Success", token: "success", hex: "#9BA23C", on: "text-primary-light" },
-  { name: "Danger", token: "danger", hex: "#B3462C", on: "text-primary-light" },
-  { name: "Muted", token: "muted", hex: "#7A8570", on: "text-primary-light" },
-  { name: "Border", token: "border", hex: "#DCD6C8", on: "text-primary" },
+  { name: "Primary", token: "primary", hex: "#3E5A33", on: "text-white" },
+  { name: "Primary Light", token: "primary-light", hex: "#EEF5EA", on: "text-primary" },
+  { name: "Neutral", token: "neutral", hex: "#98A2B3", on: "text-primary" },
+  { name: "Accent", token: "accent", hex: "#B8D6A8", on: "text-primary" },
+  { name: "Success", token: "success", hex: "#067647", on: "text-white" },
+  { name: "Danger", token: "danger", hex: "#D92D20", on: "text-white" },
+  { name: "Muted", token: "muted", hex: "#667085", on: "text-white" },
+  { name: "Border", token: "border", hex: "#EAECF0", on: "text-primary" },
 ];
 
 const typeScale = [

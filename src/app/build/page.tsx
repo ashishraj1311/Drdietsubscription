@@ -18,6 +18,7 @@ import {
   PreferencesStep,
   SummaryStep,
 } from "./steps";
+import { BuildIntro } from "./BuildIntro";
 
 type Step = {
   key: string;
@@ -53,9 +54,11 @@ function Wizard() {
   const params = useSearchParams();
   const { plan, setPlan, hydrated } = useBuilder();
   const [index, setIndex] = useState(0);
+  const [started, setStarted] = useState(false);
   const prefilled = useRef(false);
 
   // Prefill goal/diet from a curated plan when arriving via /build?plan=<id>.
+  // Arriving with a chosen plan skips the intro and lands straight in the wizard.
   useEffect(() => {
     if (!hydrated || prefilled.current) return;
     prefilled.current = true;
@@ -68,6 +71,7 @@ function Wizard() {
           goal: curated.goal,
           diet: curated.diet_type,
         });
+        setStarted(true);
       }
     }
   }, [hydrated, params, setPlan]);
@@ -87,7 +91,8 @@ function Wizard() {
 
   function back() {
     if (index === 0) {
-      router.push("/");
+      setStarted(false);
+      if (typeof window !== "undefined") window.scrollTo({ top: 0 });
       return;
     }
     setIndex((i) => Math.max(i - 1, 0));
@@ -100,6 +105,18 @@ function Wizard() {
   }
 
   const StepBody = step.Component;
+
+  if (!started) {
+    return (
+      <BuildIntro
+        onStart={() => {
+          setStarted(true);
+          if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+        }}
+        onBack={() => router.push("/")}
+      />
+    );
+  }
 
   return (
     <div className="flex min-h-full flex-col">

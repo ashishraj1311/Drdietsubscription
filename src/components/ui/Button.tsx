@@ -16,12 +16,12 @@ const button = cva(
   {
     variants: {
       variant: {
-        primary: "bg-primary text-primary-light shadow-sm hover:bg-primary-hover",
+        primary: "bg-primary text-white shadow-sm hover:bg-primary-hover",
         accent: "bg-accent text-primary shadow-sm hover:bg-accent-hover",
         outline:
           "border border-primary text-primary bg-transparent hover:bg-primary/5",
         ghost: "text-primary bg-transparent hover:bg-primary/5",
-        danger: "bg-danger text-primary-light shadow-sm hover:brightness-95",
+        danger: "bg-danger text-white shadow-sm hover:brightness-95",
       },
       size: {
         sm: "h-9 px-3.5 text-xs",

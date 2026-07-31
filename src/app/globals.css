@@ -8,24 +8,24 @@
 
 @theme {
   /* Brand palette (from Brand Guideline Dr Diet.pdf) */
-  --color-primary: #434e3d; /* olive green — logo, headings, primary buttons, dark text */
-  --color-primary-light: #f5ede1; /* warm cream — page/section backgrounds, cards */
-  --color-neutral: #a5af9b; /* sage — secondary text, borders, disabled/muted UI */
-  --color-accent: #e2e573; /* chartreuse — highlights, badges, active/selected, CTAs */
+  --color-primary: #3e5a33; /* Dr Diet green — brand, primary buttons, active/selected, links (Figma) */
+  --color-primary-light: #eef5ea; /* green tint — selected surfaces, on-brand highlight */
+  --color-neutral: #98a2b3; /* neutral-400 — borders, disabled/muted UI */
+  --color-accent: #b8d6a8; /* soft green — subtle highlights, selection ring */
 
-  /* Pragmatic in-family extensions (no generic red/green — see design system doc) */
-  --color-danger: #b3462c; /* desaturated brick — real errors only (AA: 4.7 w/ cream text) */
-  --color-success: #53702f; /* deep leaf green — confirmation states (AA: 4.9 w/ cream text) */
+  /* Semantic status colors */
+  --color-danger: #d92d20; /* red — real errors, failed payment */
+  --color-success: #067647; /* green — confirmation / success states */
 
   /* Semantic surfaces & text */
-  --color-bg: #f5ede1; /* page canvas (== primary-light) */
+  --color-bg: #f9fafb; /* light-gray page canvas (Figma background) */
   --color-surface: #ffffff; /* raised cards/sheets */
-  --color-muted: #5f6a56; /* muted/secondary text — darkened to pass AA (4.9) on cream */
-  --color-border: #dcd6c8; /* hairline borders */
+  --color-muted: #667085; /* muted/secondary text (neutral-500) */
+  --color-border: #eaecf0; /* hairline borders (neutral-200) */
 
-  /* Interactive shades (hover/active) derived from the brand hues */
-  --color-primary-hover: #363f31; /* darker olive for primary button hover */
-  --color-accent-hover: #d3d75d; /* deeper chartreuse for accent button hover */
+  /* Interactive shades (hover/active) derived from the brand green */
+  --color-primary-hover: #33492a; /* darker green for primary button hover */
+  --color-accent-hover: #a6c993; /* deeper soft-green */
 
   /* Brand corner radii (12–20px friendly, matching the rounded logo mark) */
   --radius-sm: 8px;
@@ -34,11 +34,11 @@
 
   /* Elevation — soft, warm-tinted lifts (keeps the earthy feel, adds depth so
      white cards separate from the cream canvas). */
-  --shadow-card: 0 1px 2px rgba(67, 78, 61, 0.05), 0 6px 16px -10px rgba(67, 78, 61, 0.14);
-  --shadow-card-hover: 0 2px 6px rgba(67, 78, 61, 0.08), 0 14px 26px -12px rgba(67, 78, 61, 0.2);
-  --shadow-bar: 0 -8px 24px -14px rgba(67, 78, 61, 0.22);
-  --shadow-sheet: 0 -10px 40px -12px rgba(67, 78, 61, 0.28);
-  --shadow-pop: 0 8px 30px -12px rgba(67, 78, 61, 0.25);
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.05), 0 6px 16px -10px rgba(16, 24, 40, 0.14);
+  --shadow-card-hover: 0 2px 6px rgba(16, 24, 40, 0.08), 0 14px 26px -12px rgba(16, 24, 40, 0.2);
+  --shadow-bar: 0 -8px 24px -14px rgba(16, 24, 40, 0.22);
+  --shadow-sheet: 0 -10px 40px -12px rgba(16, 24, 40, 0.28);
+  --shadow-pop: 0 8px 30px -12px rgba(16, 24, 40, 0.25);
 }
 
 @theme inline {
@@ -54,7 +54,7 @@ html {
 
 body {
   background: var(--color-bg);
-  color: var(--color-primary);
+  color: #101828; /* near-black ink — headings & body text (Figma text/primary) */
   font-family: var(--font-primary);
   -webkit-font-smoothing: antialiased;
 }

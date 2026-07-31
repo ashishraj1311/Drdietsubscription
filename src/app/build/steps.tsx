@@ -140,8 +140,8 @@ export function BodyStep() {
       <Card tone="canvas">
         <CardBody className="text-sm text-muted">
           Haven&apos;t checked your stats in a while? No problem — you can{" "}
-          <strong className="text-primary">skip this</strong> and we&apos;ll use a
-          standard target of{" "}
+          <strong className="text-primary">skip this</strong>{" "}
+          and we&apos;ll use a standard target of{" "}
           <strong className="text-primary">
             {standardCalories(plan.goal)} kcal/day
           </strong>{" "}

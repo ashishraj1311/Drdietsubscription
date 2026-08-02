@@ -39,7 +39,7 @@ export function BuildIntro({
       </header>
 
       {/* Content */}
-      <main className="mx-auto w-full max-w-lg flex-1 space-y-6 px-4 py-5">
+      <main className="mx-auto w-full max-w-lg flex-1 space-y-6 px-4 py-5 pb-28">
         {/* Hero banner */}
         <div
           className="relative overflow-hidden rounded-lg p-5"
@@ -98,8 +98,8 @@ export function BuildIntro({
         </ul>
       </main>
 
-      {/* Bottom CTA */}
-      <div className="sticky bottom-0 border-t border-border bg-surface shadow-[var(--shadow-bar)]">
+      {/* Bottom CTA — pinned to the viewport bottom */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface shadow-[var(--shadow-bar)]">
         <div className="mx-auto w-full max-w-lg space-y-1.5 px-4 py-3">
           <Button fullWidth size="lg" onClick={onStart}>
             Start building

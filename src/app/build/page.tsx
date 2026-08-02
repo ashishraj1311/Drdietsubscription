@@ -137,7 +137,7 @@ function Wizard() {
       </header>
 
       {/* Step content */}
-      <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6">
+      <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6 pb-28">
         <div className="mb-5">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">{step.title}</h1>
@@ -156,8 +156,8 @@ function Wizard() {
         <StepBody />
       </main>
 
-      {/* Bottom nav */}
-      <div className="sticky bottom-0 border-t border-border bg-surface shadow-[var(--shadow-bar)]">
+      {/* Bottom nav — pinned to the viewport bottom */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface shadow-[var(--shadow-bar)]">
         <div className="mx-auto flex w-full max-w-lg items-center gap-3 px-4 py-3">
           <Button variant="ghost" onClick={back}>
             {index === 0 ? "Cancel" : "← Back"}

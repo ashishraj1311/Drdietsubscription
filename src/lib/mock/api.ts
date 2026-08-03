@@ -3,12 +3,8 @@
 // so a real backend (Supabase/Firebase) can replace `mockApi` without touching UI.
 //
 // Static catalog (plans/meals/reviews/allergens) is read directly from ./seed.
-import {
-  COUPONS,
-  MEALS,
-  PLANS,
-  SERVICEABLE_PINCODE_PREFIXES,
-} from "@/lib/mock/seed";
+import { SERVICEABLE_PINCODE_PREFIXES } from "@/lib/mock/seed";
+import { catalogStore } from "@/lib/mock/catalogStore";
 import { computePrice, BILLING_CADENCE } from "@/lib/pricing";
 import type {
   CheckoutState,
@@ -54,10 +50,9 @@ const uid = (prefix: string) =>
 const pendingOtp = new Map<string, string>();
 
 function mealForSlotDiet(slot: MealSlot, diet: DietPreference): string {
-  const match = MEALS.find(
-    (m) => m.slot === slot && m.diet_types.includes(diet),
-  );
-  return match?.name ?? MEALS.find((m) => m.slot === slot)?.name ?? "Chef's choice";
+  const meals = catalogStore.meals();
+  const match = meals.find((m) => m.slot === slot && m.diet_types.includes(diet));
+  return match?.name ?? meals.find((m) => m.slot === slot)?.name ?? "Chef's choice";
 }
 
 // Next `count` delivery dates from `start`, skipping Sundays.
@@ -194,9 +189,7 @@ export const mockApi: DrDietApi = {
 
   async validateCoupon(code, subtotalInr, isFirstTime) {
     await delay(400);
-    const coupon = COUPONS.find(
-      (c) => c.code.toLowerCase() === code.trim().toLowerCase(),
-    );
+    const coupon = catalogStore.coupon(code);
     if (!coupon) return { ok: false, reason: "Invalid coupon code." };
     if (coupon.is_first_time_buyer_only && !isFirstTime)
       return { ok: false, reason: "This offer is for first-time orders only." };
@@ -213,11 +206,7 @@ export const mockApi: DrDietApi = {
   async createSubscription(user, plan, checkout) {
     await delay(400);
     const mealCount = plan.mealSlots.length || 1;
-    const coupon = checkout.couponCode
-      ? COUPONS.find(
-          (c) => c.code.toLowerCase() === checkout.couponCode!.toLowerCase(),
-        )
-      : null;
+    const coupon = checkout.couponCode ? catalogStore.coupon(checkout.couponCode) : null;
     const price = computePrice(plan.duration ?? "weekly", mealCount, coupon);
     const diet = plan.diet ?? "veg";
 
@@ -335,7 +324,7 @@ export const mockApi: DrDietApi = {
 
 // --- small helpers for subscription labelling ---
 function planNameFor(planId: string): string {
-  return PLANS.find((p) => p.id === planId)?.name ?? "Custom Plan";
+  return catalogStore.plans().find((p) => p.id === planId)?.name ?? "Custom Plan";
 }
 
 function dietPlanName(diet: DietPreference, goal: Goal | null): string {
@@ -360,7 +349,7 @@ function dietPlanName(diet: DietPreference, goal: Goal | null): string {
 
 function estimateCalories(plan: PlanBuilderState): number {
   if (plan.planId) {
-    const p = PLANS.find((x) => x.id === plan.planId);
+    const p = catalogStore.plans().find((x) => x.id === plan.planId);
     if (p) return p.calories_per_day;
   }
   const base =

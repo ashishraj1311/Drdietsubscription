@@ -4,7 +4,7 @@ import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Badge, Button, Card, CardBody, PageLoader } from "@/components/ui";
 import { useBuilder } from "@/lib/providers";
-import { COUPONS } from "@/lib/mock/seed";
+import { getCoupon } from "@/lib/mock/catalog";
 import { billingSentence, computePrice } from "@/lib/pricing";
 import {
   dietLabel,
@@ -26,9 +26,7 @@ export default function OrderReviewPage() {
   }, [hydrated, plan.duration, checkout.delivery.slot, router]);
 
   const mealCount = plan.duration === "trial" ? 3 : plan.mealSlots.length || 1;
-  const coupon = checkout.couponCode
-    ? COUPONS.find((c) => c.code === checkout.couponCode) ?? null
-    : null;
+  const coupon = checkout.couponCode ? getCoupon(checkout.couponCode) : null;
   const price = useMemo(
     () => computePrice(plan.duration ?? "weekly", mealCount, coupon),
     [plan.duration, mealCount, coupon],

@@ -1,24 +1,30 @@
-// Read-only catalog accessors over the static seed data.
-import { ALLERGENS, MEALS, PLANS, REVIEWS } from "@/lib/mock/seed";
+// Read-only catalog accessors. Meals/plans/coupons come from the SHARED
+// catalogStore (so admin edits reflect on the storefront); allergens/reviews
+// remain static seed (not admin-editable).
+import { ALLERGENS, REVIEWS } from "@/lib/mock/seed";
+import { catalogStore } from "@/lib/mock/catalogStore";
 import type { DietPreference, MealSlot } from "@/lib/types";
 
-export const getPlans = () => PLANS;
-export const getPlan = (id: string) => PLANS.find((p) => p.id === id) ?? null;
+export const getPlans = () => catalogStore.plans();
+export const getPlan = (id: string) => catalogStore.plan(id);
 
-export const getMeals = () => MEALS;
-export const getMeal = (id: string) => MEALS.find((m) => m.id === id) ?? null;
+export const getMeals = () => catalogStore.meals();
+export const getMeal = (id: string) => catalogStore.meal(id);
 export const getMealsByIds = (ids: string[]) =>
-  ids.map((id) => MEALS.find((m) => m.id === id)).filter(Boolean);
+  ids.map((id) => catalogStore.meal(id)).filter(Boolean);
 
 export const getMealsFor = (opts: {
   diet?: DietPreference;
   slot?: MealSlot;
 }) =>
-  MEALS.filter(
+  catalogStore.meals().filter(
     (m) =>
       (!opts.diet || m.diet_types.includes(opts.diet)) &&
       (!opts.slot || m.slot === opts.slot),
   );
+
+export const getCoupons = () => catalogStore.coupons();
+export const getCoupon = (code: string) => catalogStore.coupon(code);
 
 export const getAllergens = () => ALLERGENS;
 export const getAllergen = (id: string) =>

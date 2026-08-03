@@ -35,12 +35,18 @@ export function SiteFooter() {
             { href: "/auth", label: "Log in / Sign up" },
             { href: "/dashboard", label: "My dashboard" },
             { href: "/dashboard/support", label: "Contact support" },
+            { href: "/admin/login", label: "Staff / Admin login" },
           ]}
         />
       </div>
-      <div className="border-t border-border py-4 text-center text-xs text-muted">
-        © {new Date().getFullYear()} Dr Diet · Prices in ₹ (INR) · FSSAI Lic.
-        (placeholder)
+      <div className="flex flex-col items-center justify-center gap-1 border-t border-border py-4 text-center text-xs text-muted sm:flex-row sm:gap-3">
+        <span>
+          © {new Date().getFullYear()} Dr Diet · Prices in ₹ (INR) · FSSAI Lic.
+          (placeholder)
+        </span>
+        <Link href="/admin/login" className="font-medium text-primary hover:underline">
+          Admin console →
+        </Link>
       </div>
     </footer>
   );

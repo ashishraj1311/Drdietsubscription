@@ -71,6 +71,7 @@ function Wizard() {
           goal: curated.goal,
           diet: curated.diet_type,
         });
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time prefill from the URL on mount
         setStarted(true);
       }
     }

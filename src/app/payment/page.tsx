@@ -13,7 +13,8 @@ import {
 import { Button, Card, CardBody, Input, Logo, PageLoader } from "@/components/ui";
 import { useAuth, useBuilder } from "@/lib/providers";
 import { api } from "@/lib/mock/api";
-import { COUPONS } from "@/lib/mock/seed";
+import { adminStore } from "@/lib/admin/store";
+import { getCoupon } from "@/lib/mock/catalog";
 import { computePrice, billingSentence } from "@/lib/pricing";
 import { inr } from "@/lib/format";
 import { cn } from "@/lib/cn";
@@ -53,9 +54,7 @@ export default function PaymentPage() {
   }, [builderReady, authReady, plan.duration, checkout.delivery.slot, isLoggedIn, router]);
 
   const mealCount = plan.duration === "trial" ? 3 : plan.mealSlots.length || 1;
-  const coupon = checkout.couponCode
-    ? COUPONS.find((c) => c.code === checkout.couponCode) ?? null
-    : null;
+  const coupon = checkout.couponCode ? getCoupon(checkout.couponCode) : null;
   const price = useMemo(
     () => computePrice(plan.duration ?? "weekly", mealCount, coupon),
     [plan.duration, mealCount, coupon],
@@ -73,7 +72,22 @@ export default function PaymentPage() {
     // page guards and bounce us to /build mid-navigation. The confirmation page
     // resets the builder after it has read the persisted subscription.
     if (user) {
-      await api.createSubscription(user, plan, checkout);
+      const { subscription, invoice } = await api.createSubscription(user, plan, checkout);
+      // Mirror the order into the admin console so the customer shows up there.
+      const orders = api.getOrders(subscription.id);
+      const city =
+        checkout.address?.city ||
+        Object.values(checkout.perSlotAddresses)[0]?.city ||
+        "—";
+      adminStore.importStorefront({
+        user,
+        subscription,
+        orders,
+        invoice,
+        method,
+        city,
+        amountInr: price.totalInr,
+      });
     }
     router.replace("/confirmation");
   }

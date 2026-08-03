@@ -50,7 +50,6 @@ const uid = (prefix: string) =>
 
 // pending OTP codes (in-memory; fine for a mock)
 const pendingOtp = new Map<string, string>();
-const pendingEmailOtp = new Map<string, string>();
 
 function mealForSlotDiet(slot: MealSlot, diet: DietPreference): string {
   const meals = catalogStore.meals();
@@ -73,8 +72,10 @@ export interface DrDietApi {
   // auth
   requestOtp(phone: string): Promise<{ devCode: string }>;
   verifyOtp(phone: string, code: string): Promise<User>;
-  requestEmailOtp(email: string): Promise<{ devCode: string }>;
-  verifyEmailOtp(email: string, code: string): Promise<User>;
+  // Email magic-link sign-in. Real backend emails a link and returns
+  // { sent: true, user: null } (session completes when the link is opened);
+  // the mock signs in immediately and returns the user.
+  sendEmailLink(email: string): Promise<{ sent: boolean; user: User | null }>;
   googleSignIn(): Promise<User>;
   continueAsGuest(): Promise<User>;
   getUser(): Promise<User | null>;
@@ -144,21 +145,10 @@ export const mockApi: DrDietApi = {
     return user;
   },
 
-  async requestEmailOtp(email) {
-    await delay(600);
-    const code = String(Math.floor(1000 + Math.random() * 9000));
-    pendingEmailOtp.set(email.toLowerCase(), code);
-    return { devCode: code }; // "sent" — surfaced in the UI for the demo
-  },
-
-  async verifyEmailOtp(email, code) {
-    await delay(600);
-    const key = email.toLowerCase();
-    const expected = pendingEmailOtp.get(key);
-    if (!expected || code !== expected) {
-      throw new Error("That code doesn't match. Please try again.");
-    }
-    pendingEmailOtp.delete(key);
+  async sendEmailLink(email) {
+    await delay(500);
+    // No real email in the mock — sign the user in immediately (simulating the
+    // magic-link click) so local dev without Supabase still works.
     const existing = await this.getUser();
     const user: User = existing?.email === email
       ? { ...existing, email_verified: true }
@@ -173,7 +163,7 @@ export const mockApi: DrDietApi = {
           created_at: new Date().toISOString(),
         };
     this.saveUser(user);
-    return user;
+    return { sent: false, user };
   },
 
   async googleSignIn() {

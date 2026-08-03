@@ -18,11 +18,9 @@ function AuthClient() {
   const router = useRouter();
   const params = useSearchParams();
   const redirect = params.get("redirect") || "/build";
-  const { requestOtp, verifyOtp, requestEmailOtp, verifyEmailOtp, googleSignIn, continueAsGuest } =
-    useAuth();
+  const { requestOtp, verifyOtp, sendEmailLink, googleSignIn, continueAsGuest } = useAuth();
 
-  const [step, setStep] = useState<"method" | "otp">("method");
-  const [channel, setChannel] = useState<"phone" | "email">("phone");
+  const [step, setStep] = useState<"method" | "otp" | "emailSent">("method");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -35,11 +33,27 @@ function AuthClient() {
   const cleanPhone = phone.replace(/\D/g, "");
   const phoneValid = cleanPhone.length === 10;
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-  const destination = channel === "phone" ? `+91 ${cleanPhone}` : email.trim();
+
+  async function emailLink() {
+    setError(null);
+    setLoading("email");
+    try {
+      const res = await sendEmailLink(email.trim());
+      if (res.user) {
+        // Mock backend signs in immediately.
+        router.push(redirect);
+        return;
+      }
+      setStep("emailSent"); // real backend: await the link click
+    } catch {
+      setError("Couldn't send the email. Check the address and try again.");
+    } finally {
+      setLoading(null);
+    }
+  }
 
   async function sendOtp() {
     setError(null);
-    setChannel("phone");
     setLoading("otp");
     try {
       const { devCode } = await requestOtp(cleanPhone);
@@ -52,27 +66,11 @@ function AuthClient() {
     }
   }
 
-  async function sendEmailOtp() {
-    setError(null);
-    setChannel("email");
-    setLoading("email");
-    try {
-      const { devCode } = await requestEmailOtp(email.trim());
-      setDevCode(devCode);
-      setStep("otp");
-    } catch {
-      setError("Couldn't send the code. Please check the email and try again.");
-    } finally {
-      setLoading(null);
-    }
-  }
-
   async function verify() {
     setError(null);
     setLoading("verify");
     try {
-      if (channel === "email") await verifyEmailOtp(email.trim(), code.trim());
-      else await verifyOtp(cleanPhone, code.trim());
+      await verifyOtp(cleanPhone, code.trim());
       router.push(redirect);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Verification failed.");
@@ -101,23 +99,30 @@ function AuthClient() {
     }
   }
 
+  const heading =
+    step === "otp"
+      ? "Verify your number"
+      : step === "emailSent"
+        ? "Check your inbox"
+        : "Log in or sign up";
+  const subheading =
+    step === "otp"
+      ? `We sent a code to +91 ${cleanPhone}`
+      : step === "emailSent"
+        ? `We emailed a sign-in link to ${email.trim()}`
+        : "Sign in with email or mobile. You can also browse as a guest.";
+
   return (
     <div className="w-full max-w-sm">
       <div className="mb-6 text-center">
         <p className="font-accent text-2xl text-primary/80">Welcome to Dr Diet</p>
-        <h1 className="text-2xl font-bold">
-          {step === "method" ? "Log in or sign up" : "Verify it's you"}
-        </h1>
-        <p className="mt-1 text-sm text-muted">
-          {step === "method"
-            ? "Sign in with email or mobile. You can also browse as a guest."
-            : `We sent a code to ${destination}`}
-        </p>
+        <h1 className="text-2xl font-bold">{heading}</h1>
+        <p className="mt-1 text-sm text-muted">{subheading}</p>
       </div>
 
       <Card>
         <CardBody className="space-y-4">
-          {step === "method" ? (
+          {step === "method" && (
             <>
               <Input
                 label="Email"
@@ -127,15 +132,15 @@ function AuthClient() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                hint="We'll email you a one-time code."
-                error={channel === "email" ? error ?? undefined : undefined}
+                hint="We'll email you a one-tap sign-in link."
+                error={error ?? undefined}
               />
               <Button
                 fullWidth
                 disabled={!emailValid || loading === "email"}
-                onClick={sendEmailOtp}
+                onClick={emailLink}
               >
-                {loading === "email" ? "Emailing code…" : "Email me a code"}
+                {loading === "email" ? "Emailing link…" : "Email me a sign-in link"}
               </Button>
 
               <div className="flex items-center gap-3 py-1">
@@ -151,7 +156,6 @@ function AuthClient() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 hint="India (+91). We'll send a one-time password."
-                error={channel === "phone" ? error ?? undefined : undefined}
               />
               <Button
                 fullWidth
@@ -179,7 +183,9 @@ function AuthClient() {
                 {loading === "guest" ? "One sec…" : "Continue as guest"}
               </Button>
             </>
-          ) : (
+          )}
+
+          {step === "otp" && (
             <>
               {devCode && (
                 <div className="rounded-md border border-border bg-primary-light p-3 text-center text-sm">
@@ -188,7 +194,7 @@ function AuthClient() {
                 </div>
               )}
               <Input
-                label="Enter code"
+                label="Enter OTP"
                 inputMode="numeric"
                 placeholder="one-time code"
                 value={code}
@@ -211,7 +217,29 @@ function AuthClient() {
                   setError(null);
                 }}
               >
-                ← Use a different {channel === "email" ? "email" : "number"}
+                ← Use a different number
+              </button>
+            </>
+          )}
+
+          {step === "emailSent" && (
+            <>
+              <div className="rounded-md border border-border bg-primary-light p-4 text-center text-sm text-primary">
+                Open the email <span className="font-semibold">on this device</span> and
+                tap the sign-in link. You&apos;ll come back here already logged in.
+              </div>
+              <p className="text-center text-xs text-muted">
+                No email after a minute? Check spam, or try again — free-tier email is
+                rate-limited to a few per hour.
+              </p>
+              <button
+                className="w-full text-center text-sm text-muted hover:text-primary"
+                onClick={() => {
+                  setStep("method");
+                  setError(null);
+                }}
+              >
+                ← Use a different email
               </button>
             </>
           )}
@@ -219,7 +247,7 @@ function AuthClient() {
       </Card>
 
       <p className="mt-4 text-center text-[11px] text-muted">
-        Guest browsing is open through Explore & Compare. You&apos;ll be asked to
+        Guest browsing is open through Explore &amp; Compare. You&apos;ll be asked to
         verify only at checkout.
       </p>
       <TrustBadges className="mt-4 justify-center" />

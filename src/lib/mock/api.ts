@@ -50,6 +50,7 @@ const uid = (prefix: string) =>
 
 // pending OTP codes (in-memory; fine for a mock)
 const pendingOtp = new Map<string, string>();
+const pendingEmailOtp = new Map<string, string>();
 
 function mealForSlotDiet(slot: MealSlot, diet: DietPreference): string {
   const meals = catalogStore.meals();
@@ -72,6 +73,8 @@ export interface DrDietApi {
   // auth
   requestOtp(phone: string): Promise<{ devCode: string }>;
   verifyOtp(phone: string, code: string): Promise<User>;
+  requestEmailOtp(email: string): Promise<{ devCode: string }>;
+  verifyEmailOtp(email: string, code: string): Promise<User>;
   googleSignIn(): Promise<User>;
   continueAsGuest(): Promise<User>;
   getUser(): Promise<User | null>;
@@ -135,6 +138,38 @@ export const mockApi: DrDietApi = {
           auth_provider: "otp",
           phone_verified: true,
           email_verified: false,
+          created_at: new Date().toISOString(),
+        };
+    this.saveUser(user);
+    return user;
+  },
+
+  async requestEmailOtp(email) {
+    await delay(600);
+    const code = String(Math.floor(1000 + Math.random() * 9000));
+    pendingEmailOtp.set(email.toLowerCase(), code);
+    return { devCode: code }; // "sent" — surfaced in the UI for the demo
+  },
+
+  async verifyEmailOtp(email, code) {
+    await delay(600);
+    const key = email.toLowerCase();
+    const expected = pendingEmailOtp.get(key);
+    if (!expected || code !== expected) {
+      throw new Error("That code doesn't match. Please try again.");
+    }
+    pendingEmailOtp.delete(key);
+    const existing = await this.getUser();
+    const user: User = existing?.email === email
+      ? { ...existing, email_verified: true }
+      : {
+          id: uid("u"),
+          name: "",
+          email,
+          phone: null,
+          auth_provider: "otp",
+          phone_verified: false,
+          email_verified: true,
           created_at: new Date().toISOString(),
         };
     this.saveUser(user);

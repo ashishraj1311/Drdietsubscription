@@ -212,6 +212,31 @@ export const supabaseApi: DrDietApi = {
     return user;
   },
 
+  async requestEmailOtp(email) {
+    const { error } = await db().auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: true },
+    });
+    if (error) throw new Error(error.message);
+    return { devCode: "" }; // real email — the code arrives in the inbox
+  },
+
+  async verifyEmailOtp(email, code) {
+    const client = db();
+    const { error } = await client.auth.verifyOtp({ email, token: code, type: "email" });
+    if (error) throw new Error("That code doesn't match. Please try again.");
+    const { data: sessionData } = await client.auth.getUser();
+    if (sessionData.user) {
+      await client
+        .from("profiles")
+        .update({ email, email_verified: true })
+        .eq("id", sessionData.user.id);
+    }
+    const user = await currentProfile();
+    if (!user) throw new Error("Could not load your profile after sign-in.");
+    return user;
+  },
+
   async googleSignIn() {
     const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/auth` : undefined;
     const { error } = await db().auth.signInWithOAuth({ provider: "google", options: { redirectTo } });

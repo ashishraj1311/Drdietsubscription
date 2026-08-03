@@ -6,6 +6,8 @@
 import { SERVICEABLE_PINCODE_PREFIXES } from "@/lib/mock/seed";
 import { catalogStore } from "@/lib/mock/catalogStore";
 import { computePrice, BILLING_CADENCE } from "@/lib/pricing";
+import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { supabaseApi } from "@/lib/supabase/api";
 import type {
   CheckoutState,
   Coupon,
@@ -72,9 +74,13 @@ export interface DrDietApi {
   verifyOtp(phone: string, code: string): Promise<User>;
   googleSignIn(): Promise<User>;
   continueAsGuest(): Promise<User>;
-  getUser(): User | null;
-  saveUser(user: User): void;
-  signOut(): void;
+  getUser(): Promise<User | null>;
+  saveUser(user: User): Promise<void>;
+  signOut(): Promise<void>;
+  // Optional: notify when the auth session changes (used by real backends whose
+  // sign-in completes via redirect, e.g. OAuth). Mock has no async session, so
+  // it doesn't implement this. Returns an unsubscribe function.
+  subscribeAuth?(cb: (user: User | null) => void): () => void;
 
   // serviceability + coupons
   checkServiceability(pincode: string): Promise<boolean>;
@@ -90,10 +96,10 @@ export interface DrDietApi {
     plan: PlanBuilderState,
     checkout: CheckoutState,
   ): Promise<{ subscription: Subscription; invoice: Invoice }>;
-  getSubscriptions(userId: string): Subscription[];
-  getActiveSubscription(userId: string): Subscription | null;
-  getOrders(subscriptionId: string): Order[];
-  getInvoices(userId: string): Invoice[];
+  getSubscriptions(userId: string): Promise<Subscription[]>;
+  getActiveSubscription(userId: string): Promise<Subscription | null>;
+  getOrders(subscriptionId: string): Promise<Order[]>;
+  getInvoices(userId: string): Promise<Invoice[]>;
 
   // dashboard actions
   setSubscriptionStatus(
@@ -118,7 +124,7 @@ export const mockApi: DrDietApi = {
       throw new Error("That code doesn't match. Please try again.");
     }
     pendingOtp.delete(phone);
-    const existing = this.getUser();
+    const existing = await this.getUser();
     const user: User = existing?.phone === phone
       ? { ...existing, phone_verified: true }
       : {
@@ -167,15 +173,15 @@ export const mockApi: DrDietApi = {
     return user;
   },
 
-  getUser() {
+  async getUser() {
     return read<User | null>(LS.user, null);
   },
 
-  saveUser(user) {
+  async saveUser(user) {
     write(LS.user, user);
   },
 
-  signOut() {
+  async signOut() {
     if (typeof window === "undefined") return;
     localStorage.removeItem(LS.user);
   },
@@ -266,11 +272,11 @@ export const mockApi: DrDietApi = {
     return { subscription, invoice };
   },
 
-  getSubscriptions(userId) {
+  async getSubscriptions(userId) {
     return read<Subscription[]>(LS.subs, []).filter((s) => s.userId === userId);
   },
 
-  getActiveSubscription(userId) {
+  async getActiveSubscription(userId) {
     return (
       read<Subscription[]>(LS.subs, [])
         .filter((s) => s.userId === userId)
@@ -278,14 +284,14 @@ export const mockApi: DrDietApi = {
     );
   },
 
-  getOrders(subscriptionId) {
+  async getOrders(subscriptionId) {
     return read<Order[]>(LS.orders, [])
       .filter((o) => o.subscriptionId === subscriptionId)
       .sort((a, b) => a.deliveryDate.localeCompare(b.deliveryDate));
   },
 
-  getInvoices(userId) {
-    const subIds = new Set(this.getSubscriptions(userId).map((s) => s.id));
+  async getInvoices(userId) {
+    const subIds = new Set((await this.getSubscriptions(userId)).map((s) => s.id));
     return read<Invoice[]>(LS.invoices, []).filter((i) =>
       subIds.has(i.subscriptionId),
     );
@@ -364,4 +370,7 @@ function estimateCalories(plan: PlanBuilderState): number {
   return base;
 }
 
-export const api = mockApi;
+// Adapter selection: use the real Supabase backend when it's configured
+// (NEXT_PUBLIC_SUPABASE_URL + ANON_KEY present), otherwise the localStorage mock.
+// This is the single swap point promised by the DrDietApi seam — no UI changes.
+export const api: DrDietApi = isSupabaseConfigured() ? supabaseApi : mockApi;

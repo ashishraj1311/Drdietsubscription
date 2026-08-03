@@ -74,7 +74,7 @@ export default function PaymentPage() {
     if (user) {
       const { subscription, invoice } = await api.createSubscription(user, plan, checkout);
       // Mirror the order into the admin console so the customer shows up there.
-      const orders = api.getOrders(subscription.id);
+      const orders = await api.getOrders(subscription.id);
       const city =
         checkout.address?.city ||
         Object.values(checkout.perSlotAddresses)[0]?.city ||

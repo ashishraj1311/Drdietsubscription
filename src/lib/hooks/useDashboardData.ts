@@ -22,7 +22,7 @@ export function useDashboardData(): DashboardData {
   const [orders, setOrders] = useState<Order[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
 
-  const load = useCallback(() => {
+  const load = useCallback(async () => {
     if (!user) {
       setSubscription(null);
       setOrders([]);
@@ -30,10 +30,10 @@ export function useDashboardData(): DashboardData {
       setLoading(false);
       return;
     }
-    const sub = api.getActiveSubscription(user.id);
+    const sub = await api.getActiveSubscription(user.id);
     setSubscription(sub);
-    setOrders(sub ? api.getOrders(sub.id) : []);
-    setInvoices(api.getInvoices(user.id));
+    setOrders(sub ? await api.getOrders(sub.id) : []);
+    setInvoices(await api.getInvoices(user.id));
     setLoading(false);
   }, [user]);
 

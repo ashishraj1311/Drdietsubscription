@@ -17,11 +17,21 @@ export default function ConfirmationPage() {
 
   useEffect(() => {
     if (!hydrated) return;
-    // Read the persisted subscription (client-only store) after hydration,
-    // then clear the builder working state now that the order is placed.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSub(user ? api.getActiveSubscription(user.id) : null);
+    // Read the persisted subscription after hydration, then clear the builder
+    // working state now that the order is placed.
+    let active = true;
+    if (user) {
+      api.getActiveSubscription(user.id).then((s) => {
+        if (active) setSub(s);
+      });
+    } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSub(null);
+    }
     resetAll();
+    return () => {
+      active = false;
+    };
   }, [hydrated, user, resetAll]);
 
   if (sub === undefined) {

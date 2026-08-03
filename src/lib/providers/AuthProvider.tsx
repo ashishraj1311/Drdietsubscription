@@ -31,11 +31,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    // Hydrate the session from localStorage (client-only) on mount.
-    /* eslint-disable react-hooks/set-state-in-effect */
-    setUser(api.getUser());
-    setHydrated(true);
-    /* eslint-enable react-hooks/set-state-in-effect */
+    // Hydrate the session on mount (async: localStorage mock resolves instantly,
+    // Supabase reads the real session). Also subscribe to auth changes so a
+    // redirect-based sign-in (OAuth) updates the user when it completes.
+    let active = true;
+    api.getUser().then((u) => {
+      if (!active) return;
+      setUser(u);
+      setHydrated(true);
+    });
+    const unsub = api.subscribeAuth?.((u) => {
+      if (active) setUser(u);
+    });
+    return () => {
+      active = false;
+      unsub?.();
+    };
   }, []);
 
   const requestOtp = useCallback((phone: string) => api.requestOtp(phone), []);
@@ -62,13 +73,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser((prev) => {
       if (!prev) return prev;
       const next = { ...prev, ...patch };
-      api.saveUser(next);
+      void api.saveUser(next);
       return next;
     });
   }, []);
 
   const signOut = useCallback(() => {
-    api.signOut();
+    void api.signOut();
     setUser(null);
   }, []);
 

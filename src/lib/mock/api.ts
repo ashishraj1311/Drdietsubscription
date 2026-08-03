@@ -72,6 +72,10 @@ export interface DrDietApi {
   // auth
   requestOtp(phone: string): Promise<{ devCode: string }>;
   verifyOtp(phone: string, code: string): Promise<User>;
+  // Email magic-link sign-in. Real backend emails a link and returns
+  // { sent: true, user: null } (session completes when the link is opened);
+  // the mock signs in immediately and returns the user.
+  sendEmailLink(email: string): Promise<{ sent: boolean; user: User | null }>;
   googleSignIn(): Promise<User>;
   continueAsGuest(): Promise<User>;
   getUser(): Promise<User | null>;
@@ -139,6 +143,27 @@ export const mockApi: DrDietApi = {
         };
     this.saveUser(user);
     return user;
+  },
+
+  async sendEmailLink(email) {
+    await delay(500);
+    // No real email in the mock — sign the user in immediately (simulating the
+    // magic-link click) so local dev without Supabase still works.
+    const existing = await this.getUser();
+    const user: User = existing?.email === email
+      ? { ...existing, email_verified: true }
+      : {
+          id: uid("u"),
+          name: "",
+          email,
+          phone: null,
+          auth_provider: "otp",
+          phone_verified: false,
+          email_verified: true,
+          created_at: new Date().toISOString(),
+        };
+    this.saveUser(user);
+    return { sent: false, user };
   },
 
   async googleSignIn() {

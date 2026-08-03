@@ -212,6 +212,19 @@ export const supabaseApi: DrDietApi = {
     return user;
   },
 
+  async sendEmailLink(email) {
+    const redirectTo =
+      typeof window !== "undefined" ? `${window.location.origin}/build` : undefined;
+    const { error } = await db().auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: true, emailRedirectTo: redirectTo },
+    });
+    if (error) throw new Error(error.message);
+    // The session completes when the user opens the emailed link; subscribeAuth
+    // (onAuthStateChange) then hydrates the user. Nothing to return yet.
+    return { sent: true, user: null };
+  },
+
   async googleSignIn() {
     const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/auth` : undefined;
     const { error } = await db().auth.signInWithOAuth({ provider: "google", options: { redirectTo } });

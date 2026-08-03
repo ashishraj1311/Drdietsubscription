@@ -18,6 +18,7 @@ interface AuthContextValue {
   isGuest: boolean;
   requestOtp: (phone: string) => Promise<{ devCode: string }>;
   verifyOtp: (phone: string, code: string) => Promise<User>;
+  sendEmailLink: (email: string) => Promise<{ sent: boolean; user: User | null }>;
   googleSignIn: () => Promise<User>;
   continueAsGuest: () => Promise<User>;
   updateUser: (patch: Partial<User>) => void;
@@ -57,6 +58,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return u;
   }, []);
 
+  const sendEmailLink = useCallback(async (email: string) => {
+    const res = await api.sendEmailLink(email);
+    if (res.user) setUser(res.user);
+    return res;
+  }, []);
+
   const googleSignIn = useCallback(async () => {
     const u = await api.googleSignIn();
     setUser(u);
@@ -91,6 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isGuest: user?.auth_provider === "guest",
       requestOtp,
       verifyOtp,
+      sendEmailLink,
       googleSignIn,
       continueAsGuest,
       updateUser,
@@ -101,6 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       hydrated,
       requestOtp,
       verifyOtp,
+      sendEmailLink,
       googleSignIn,
       continueAsGuest,
       updateUser,

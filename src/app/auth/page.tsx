@@ -18,16 +18,14 @@ function AuthClient() {
   const router = useRouter();
   const params = useSearchParams();
   const redirect = params.get("redirect") || "/build";
-  const { requestOtp, verifyOtp, sendEmailLink, googleSignIn, continueAsGuest } = useAuth();
+  const { requestOtp, verifyOtp, sendEmailLink } = useAuth();
 
   const [step, setStep] = useState<"method" | "otp" | "emailSent">("method");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [devCode, setDevCode] = useState<string | null>(null);
-  const [loading, setLoading] = useState<
-    null | "otp" | "email" | "verify" | "google" | "guest"
-  >(null);
+  const [loading, setLoading] = useState<null | "otp" | "email" | "verify">(null);
   const [error, setError] = useState<string | null>(null);
 
   const cleanPhone = phone.replace(/\D/g, "");
@@ -79,26 +77,6 @@ function AuthClient() {
     }
   }
 
-  async function google() {
-    setLoading("google");
-    try {
-      await googleSignIn();
-      router.push(redirect);
-    } finally {
-      setLoading(null);
-    }
-  }
-
-  async function guest() {
-    setLoading("guest");
-    try {
-      await continueAsGuest();
-      router.push(redirect);
-    } finally {
-      setLoading(null);
-    }
-  }
-
   const heading =
     step === "otp"
       ? "Verify your number"
@@ -110,7 +88,7 @@ function AuthClient() {
       ? `We sent a code to +91 ${cleanPhone}`
       : step === "emailSent"
         ? `We emailed a sign-in link to ${email.trim()}`
-        : "Sign in with email or mobile. You can also browse as a guest.";
+        : "Sign in with your email or mobile number to continue.";
 
   return (
     <div className="w-full max-w-sm">
@@ -164,23 +142,6 @@ function AuthClient() {
                 onClick={sendOtp}
               >
                 {loading === "otp" ? "Sending code…" : "Send OTP"}
-              </Button>
-
-              <Button
-                fullWidth
-                variant="outline"
-                disabled={loading === "google"}
-                onClick={google}
-              >
-                {loading === "google" ? "Connecting…" : "Continue with Google"}
-              </Button>
-              <Button
-                fullWidth
-                variant="ghost"
-                disabled={loading === "guest"}
-                onClick={guest}
-              >
-                {loading === "guest" ? "One sec…" : "Continue as guest"}
               </Button>
             </>
           )}
@@ -247,8 +208,7 @@ function AuthClient() {
       </Card>
 
       <p className="mt-4 text-center text-[11px] text-muted">
-        Guest browsing is open through Explore &amp; Compare. You&apos;ll be asked to
-        verify only at checkout.
+        Browse Explore &amp; Compare freely — sign in to build and order your plan.
       </p>
       <TrustBadges className="mt-4 justify-center" />
     </div>

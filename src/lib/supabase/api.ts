@@ -212,17 +212,31 @@ export const supabaseApi: DrDietApi = {
     return user;
   },
 
-  async sendEmailLink(email) {
-    const redirectTo =
-      typeof window !== "undefined" ? `${window.location.origin}/build` : undefined;
+  async requestEmailOtp(email) {
+    // shouldCreateUser + a template containing {{ .Token }} makes Supabase email
+    // a 6-digit code (not a magic link). Requires custom SMTP to edit templates.
     const { error } = await db().auth.signInWithOtp({
       email,
-      options: { shouldCreateUser: true, emailRedirectTo: redirectTo },
+      options: { shouldCreateUser: true },
     });
     if (error) throw new Error(error.message);
-    // The session completes when the user opens the emailed link; subscribeAuth
-    // (onAuthStateChange) then hydrates the user. Nothing to return yet.
-    return { sent: true, user: null };
+    return { devCode: "" }; // real email — the code arrives in the inbox
+  },
+
+  async verifyEmailOtp(email, code) {
+    const client = db();
+    const { error } = await client.auth.verifyOtp({ email, token: code, type: "email" });
+    if (error) throw new Error("That code doesn't match. Please try again.");
+    const { data: sessionData } = await client.auth.getUser();
+    if (sessionData.user) {
+      await client
+        .from("profiles")
+        .update({ email, email_verified: true })
+        .eq("id", sessionData.user.id);
+    }
+    const user = await currentProfile();
+    if (!user) throw new Error("Could not load your profile after sign-in.");
+    return user;
   },
 
   async googleSignIn() {

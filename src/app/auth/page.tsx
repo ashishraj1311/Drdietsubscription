@@ -1,10 +1,13 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, Card, CardBody, Input, PageLoader } from "@/components/ui";
+import { Button, Card, CardBody, Input, OtpInput, PageLoader } from "@/components/ui";
 import { TrustBadges } from "@/components/shared/bits";
 import { useAuth } from "@/lib/providers";
+
+const CODE_LENGTH = 6;
+const RESEND_SECONDS = 30;
 
 export default function AuthPage() {
   return (
@@ -18,111 +21,104 @@ function AuthClient() {
   const router = useRouter();
   const params = useSearchParams();
   const redirect = params.get("redirect") || "/build";
-  const { requestOtp, verifyOtp, sendEmailLink, googleSignIn, continueAsGuest } = useAuth();
+  const { requestOtp, verifyOtp, requestEmailOtp, verifyEmailOtp } = useAuth();
 
-  const [step, setStep] = useState<"method" | "otp" | "emailSent">("method");
+  const [step, setStep] = useState<"method" | "otp">("method");
+  const [channel, setChannel] = useState<"phone" | "email">("phone");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [devCode, setDevCode] = useState<string | null>(null);
-  const [loading, setLoading] = useState<
-    null | "otp" | "email" | "verify" | "google" | "guest"
-  >(null);
+  const [loading, setLoading] = useState<null | "otp" | "email" | "verify" | "resend">(null);
   const [error, setError] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
 
   const cleanPhone = phone.replace(/\D/g, "");
   const phoneValid = cleanPhone.length === 10;
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const destination = channel === "phone" ? `+91 ${cleanPhone}` : email.trim();
 
-  async function emailLink() {
-    setError(null);
-    setLoading("email");
-    try {
-      const res = await sendEmailLink(email.trim());
-      if (res.user) {
-        // Mock backend signs in immediately.
-        router.push(redirect);
-        return;
-      }
-      setStep("emailSent"); // real backend: await the link click
-    } catch {
-      setError("Couldn't send the email. Check the address and try again.");
-    } finally {
-      setLoading(null);
-    }
-  }
+  // Resend countdown tick.
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown(cooldown - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
 
-  async function sendOtp() {
+  async function request(ch: "phone" | "email") {
     setError(null);
-    setLoading("otp");
+    setChannel(ch);
+    setLoading(ch === "phone" ? "otp" : "email");
     try {
-      const { devCode } = await requestOtp(cleanPhone);
-      setDevCode(devCode);
+      const { devCode } =
+        ch === "phone" ? await requestOtp(cleanPhone) : await requestEmailOtp(email.trim());
+      setDevCode(devCode || null);
+      setCode("");
       setStep("otp");
+      setCooldown(RESEND_SECONDS);
     } catch {
-      setError("Couldn't send the code. Please try again.");
+      setError(
+        ch === "phone"
+          ? "Couldn't send the code. Please try again."
+          : "Couldn't send the code. Check the email and try again.",
+      );
     } finally {
       setLoading(null);
     }
   }
 
-  async function verify() {
+  async function resend() {
+    if (cooldown > 0) return;
+    setError(null);
+    setLoading("resend");
+    try {
+      const { devCode } =
+        channel === "phone"
+          ? await requestOtp(cleanPhone)
+          : await requestEmailOtp(email.trim());
+      setDevCode(devCode || null);
+      setCode("");
+      setCooldown(RESEND_SECONDS);
+    } catch {
+      setError("Couldn't resend the code. Please try again.");
+    } finally {
+      setLoading(null);
+    }
+  }
+
+  async function verify(submitCode = code) {
+    if (submitCode.trim().length < CODE_LENGTH || loading === "verify") return;
     setError(null);
     setLoading("verify");
     try {
-      await verifyOtp(cleanPhone, code.trim());
+      if (channel === "email") await verifyEmailOtp(email.trim(), submitCode.trim());
+      else await verifyOtp(cleanPhone, submitCode.trim());
       router.push(redirect);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Verification failed.");
+      setError(e instanceof Error ? e.message : "That code didn't work. Please try again.");
+      setCode("");
     } finally {
       setLoading(null);
     }
   }
-
-  async function google() {
-    setLoading("google");
-    try {
-      await googleSignIn();
-      router.push(redirect);
-    } finally {
-      setLoading(null);
-    }
-  }
-
-  async function guest() {
-    setLoading("guest");
-    try {
-      await continueAsGuest();
-      router.push(redirect);
-    } finally {
-      setLoading(null);
-    }
-  }
-
-  const heading =
-    step === "otp"
-      ? "Verify your number"
-      : step === "emailSent"
-        ? "Check your inbox"
-        : "Log in or sign up";
-  const subheading =
-    step === "otp"
-      ? `We sent a code to +91 ${cleanPhone}`
-      : step === "emailSent"
-        ? `We emailed a sign-in link to ${email.trim()}`
-        : "Sign in with email or mobile. You can also browse as a guest.";
 
   return (
     <div className="w-full max-w-sm">
       <div className="mb-6 text-center">
         <p className="font-accent text-2xl text-primary/80">Welcome to Dr Diet</p>
-        <h1 className="text-2xl font-bold">{heading}</h1>
-        <p className="mt-1 text-sm text-muted">{subheading}</p>
+        <h1 className="text-2xl font-bold">
+          {step === "method" ? "Log in or sign up" : "Verify it's you"}
+        </h1>
+        <p className="mt-1 text-sm text-muted">
+          {step === "method"
+            ? "Sign in with a one-time code by email or mobile."
+            : `Enter the ${CODE_LENGTH}-digit code sent to ${destination}`}
+        </p>
       </div>
 
       <Card>
         <CardBody className="space-y-4">
-          {step === "method" && (
+          {step === "method" ? (
             <>
               <Input
                 label="Email"
@@ -132,15 +128,18 @@ function AuthClient() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                hint="We'll email you a one-tap sign-in link."
-                error={error ?? undefined}
+                hint="We'll email you a one-time code."
+                error={channel === "email" ? error ?? undefined : undefined}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && emailValid) request("email");
+                }}
               />
               <Button
                 fullWidth
                 disabled={!emailValid || loading === "email"}
-                onClick={emailLink}
+                onClick={() => request("email")}
               >
-                {loading === "email" ? "Emailing link…" : "Email me a sign-in link"}
+                {loading === "email" ? "Emailing code…" : "Email me a code"}
               </Button>
 
               <div className="flex items-center gap-3 py-1">
@@ -155,37 +154,22 @@ function AuthClient() {
                 placeholder="98765 43210"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                hint="India (+91). We'll send a one-time password."
+                hint="India (+91). We'll text you a one-time code."
+                error={channel === "phone" ? error ?? undefined : undefined}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && phoneValid) request("phone");
+                }}
               />
               <Button
                 fullWidth
                 variant="outline"
                 disabled={!phoneValid || loading === "otp"}
-                onClick={sendOtp}
+                onClick={() => request("phone")}
               >
                 {loading === "otp" ? "Sending code…" : "Send OTP"}
               </Button>
-
-              <Button
-                fullWidth
-                variant="outline"
-                disabled={loading === "google"}
-                onClick={google}
-              >
-                {loading === "google" ? "Connecting…" : "Continue with Google"}
-              </Button>
-              <Button
-                fullWidth
-                variant="ghost"
-                disabled={loading === "guest"}
-                onClick={guest}
-              >
-                {loading === "guest" ? "One sec…" : "Continue as guest"}
-              </Button>
             </>
-          )}
-
-          {step === "otp" && (
+          ) : (
             <>
               {devCode && (
                 <div className="rounded-md border border-border bg-primary-light p-3 text-center text-sm">
@@ -193,62 +177,57 @@ function AuthClient() {
                   <span className="font-bold tracking-widest">{devCode}</span>
                 </div>
               )}
-              <Input
-                label="Enter OTP"
-                inputMode="numeric"
-                placeholder="one-time code"
+
+              <OtpInput
                 value={code}
-                onChange={(e) => setCode(e.target.value)}
-                error={error ?? undefined}
-                maxLength={6}
+                onChange={setCode}
+                onComplete={(c) => verify(c)}
+                length={CODE_LENGTH}
+                disabled={loading === "verify"}
+                error={!!error}
+                autoFocus
               />
+              {error && <p className="text-center text-xs text-danger">{error}</p>}
+
               <Button
                 fullWidth
-                disabled={code.trim().length < 4 || loading === "verify"}
-                onClick={verify}
+                disabled={code.trim().length < CODE_LENGTH || loading === "verify"}
+                onClick={() => verify()}
               >
                 {loading === "verify" ? "Verifying…" : "Verify & continue"}
               </Button>
-              <button
-                className="w-full text-center text-sm text-muted hover:text-primary"
-                onClick={() => {
-                  setStep("method");
-                  setCode("");
-                  setError(null);
-                }}
-              >
-                ← Use a different number
-              </button>
-            </>
-          )}
 
-          {step === "emailSent" && (
-            <>
-              <div className="rounded-md border border-border bg-primary-light p-4 text-center text-sm text-primary">
-                Open the email <span className="font-semibold">on this device</span> and
-                tap the sign-in link. You&apos;ll come back here already logged in.
+              <div className="flex items-center justify-between text-sm">
+                <button
+                  className="text-muted hover:text-primary"
+                  onClick={() => {
+                    setStep("method");
+                    setCode("");
+                    setError(null);
+                    setCooldown(0);
+                  }}
+                >
+                  ← Change {channel === "email" ? "email" : "number"}
+                </button>
+                <button
+                  className="font-semibold text-primary disabled:text-muted disabled:no-underline hover:underline"
+                  disabled={cooldown > 0 || loading === "resend"}
+                  onClick={resend}
+                >
+                  {loading === "resend"
+                    ? "Resending…"
+                    : cooldown > 0
+                      ? `Resend in ${cooldown}s`
+                      : "Resend code"}
+                </button>
               </div>
-              <p className="text-center text-xs text-muted">
-                No email after a minute? Check spam, or try again — free-tier email is
-                rate-limited to a few per hour.
-              </p>
-              <button
-                className="w-full text-center text-sm text-muted hover:text-primary"
-                onClick={() => {
-                  setStep("method");
-                  setError(null);
-                }}
-              >
-                ← Use a different email
-              </button>
             </>
           )}
         </CardBody>
       </Card>
 
       <p className="mt-4 text-center text-[11px] text-muted">
-        Guest browsing is open through Explore &amp; Compare. You&apos;ll be asked to
-        verify only at checkout.
+        Browse Explore &amp; Compare freely — sign in to build and order your plan.
       </p>
       <TrustBadges className="mt-4 justify-center" />
     </div>

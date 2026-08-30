@@ -1,10 +1,13 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, Card, CardBody, Input, PageLoader } from "@/components/ui";
+import { Button, Card, CardBody, Input, OtpInput, PageLoader } from "@/components/ui";
 import { TrustBadges } from "@/components/shared/bits";
 import { useAuth } from "@/lib/providers";
+
+const CODE_LENGTH = 6;
+const RESEND_SECONDS = 30;
 
 export default function AuthPage() {
   return (
@@ -26,53 +29,74 @@ function AuthClient() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [devCode, setDevCode] = useState<string | null>(null);
-  const [loading, setLoading] = useState<null | "otp" | "email" | "verify">(null);
+  const [loading, setLoading] = useState<null | "otp" | "email" | "verify" | "resend">(null);
   const [error, setError] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
 
   const cleanPhone = phone.replace(/\D/g, "");
   const phoneValid = cleanPhone.length === 10;
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const destination = channel === "phone" ? `+91 ${cleanPhone}` : email.trim();
 
-  async function sendOtp() {
+  // Resend countdown tick.
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown(cooldown - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
+
+  async function request(ch: "phone" | "email") {
     setError(null);
-    setChannel("phone");
-    setLoading("otp");
+    setChannel(ch);
+    setLoading(ch === "phone" ? "otp" : "email");
     try {
-      const { devCode } = await requestOtp(cleanPhone);
-      setDevCode(devCode);
+      const { devCode } =
+        ch === "phone" ? await requestOtp(cleanPhone) : await requestEmailOtp(email.trim());
+      setDevCode(devCode || null);
+      setCode("");
       setStep("otp");
+      setCooldown(RESEND_SECONDS);
     } catch {
-      setError("Couldn't send the code. Please try again.");
+      setError(
+        ch === "phone"
+          ? "Couldn't send the code. Please try again."
+          : "Couldn't send the code. Check the email and try again.",
+      );
     } finally {
       setLoading(null);
     }
   }
 
-  async function sendEmailOtp() {
+  async function resend() {
+    if (cooldown > 0) return;
     setError(null);
-    setChannel("email");
-    setLoading("email");
+    setLoading("resend");
     try {
-      const { devCode } = await requestEmailOtp(email.trim());
-      setDevCode(devCode);
-      setStep("otp");
+      const { devCode } =
+        channel === "phone"
+          ? await requestOtp(cleanPhone)
+          : await requestEmailOtp(email.trim());
+      setDevCode(devCode || null);
+      setCode("");
+      setCooldown(RESEND_SECONDS);
     } catch {
-      setError("Couldn't send the code. Check the email and try again.");
+      setError("Couldn't resend the code. Please try again.");
     } finally {
       setLoading(null);
     }
   }
 
-  async function verify() {
+  async function verify(submitCode = code) {
+    if (submitCode.trim().length < CODE_LENGTH || loading === "verify") return;
     setError(null);
     setLoading("verify");
     try {
-      if (channel === "email") await verifyEmailOtp(email.trim(), code.trim());
-      else await verifyOtp(cleanPhone, code.trim());
+      if (channel === "email") await verifyEmailOtp(email.trim(), submitCode.trim());
+      else await verifyOtp(cleanPhone, submitCode.trim());
       router.push(redirect);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Verification failed.");
+      setError(e instanceof Error ? e.message : "That code didn't work. Please try again.");
+      setCode("");
     } finally {
       setLoading(null);
     }
@@ -88,7 +112,7 @@ function AuthClient() {
         <p className="mt-1 text-sm text-muted">
           {step === "method"
             ? "Sign in with a one-time code by email or mobile."
-            : `We sent a code to ${destination}`}
+            : `Enter the ${CODE_LENGTH}-digit code sent to ${destination}`}
         </p>
       </div>
 
@@ -106,11 +130,14 @@ function AuthClient() {
                 onChange={(e) => setEmail(e.target.value)}
                 hint="We'll email you a one-time code."
                 error={channel === "email" ? error ?? undefined : undefined}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && emailValid) request("email");
+                }}
               />
               <Button
                 fullWidth
                 disabled={!emailValid || loading === "email"}
-                onClick={sendEmailOtp}
+                onClick={() => request("email")}
               >
                 {loading === "email" ? "Emailing code…" : "Email me a code"}
               </Button>
@@ -129,12 +156,15 @@ function AuthClient() {
                 onChange={(e) => setPhone(e.target.value)}
                 hint="India (+91). We'll text you a one-time code."
                 error={channel === "phone" ? error ?? undefined : undefined}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && phoneValid) request("phone");
+                }}
               />
               <Button
                 fullWidth
                 variant="outline"
                 disabled={!phoneValid || loading === "otp"}
-                onClick={sendOtp}
+                onClick={() => request("phone")}
               >
                 {loading === "otp" ? "Sending code…" : "Send OTP"}
               </Button>
@@ -147,32 +177,50 @@ function AuthClient() {
                   <span className="font-bold tracking-widest">{devCode}</span>
                 </div>
               )}
-              <Input
-                label="Enter code"
-                inputMode="numeric"
-                placeholder="one-time code"
+
+              <OtpInput
                 value={code}
-                onChange={(e) => setCode(e.target.value)}
-                error={error ?? undefined}
-                maxLength={6}
+                onChange={setCode}
+                onComplete={(c) => verify(c)}
+                length={CODE_LENGTH}
+                disabled={loading === "verify"}
+                error={!!error}
+                autoFocus
               />
+              {error && <p className="text-center text-xs text-danger">{error}</p>}
+
               <Button
                 fullWidth
-                disabled={code.trim().length < 4 || loading === "verify"}
-                onClick={verify}
+                disabled={code.trim().length < CODE_LENGTH || loading === "verify"}
+                onClick={() => verify()}
               >
                 {loading === "verify" ? "Verifying…" : "Verify & continue"}
               </Button>
-              <button
-                className="w-full text-center text-sm text-muted hover:text-primary"
-                onClick={() => {
-                  setStep("method");
-                  setCode("");
-                  setError(null);
-                }}
-              >
-                ← Use a different {channel === "email" ? "email" : "number"}
-              </button>
+
+              <div className="flex items-center justify-between text-sm">
+                <button
+                  className="text-muted hover:text-primary"
+                  onClick={() => {
+                    setStep("method");
+                    setCode("");
+                    setError(null);
+                    setCooldown(0);
+                  }}
+                >
+                  ← Change {channel === "email" ? "email" : "number"}
+                </button>
+                <button
+                  className="font-semibold text-primary disabled:text-muted disabled:no-underline hover:underline"
+                  disabled={cooldown > 0 || loading === "resend"}
+                  onClick={resend}
+                >
+                  {loading === "resend"
+                    ? "Resending…"
+                    : cooldown > 0
+                      ? `Resend in ${cooldown}s`
+                      : "Resend code"}
+                </button>
+              </div>
             </>
           )}
         </CardBody>

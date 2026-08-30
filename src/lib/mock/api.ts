@@ -115,7 +115,7 @@ export interface DrDietApi {
 export const mockApi: DrDietApi = {
   async requestOtp(phone) {
     await delay(600);
-    const code = String(Math.floor(1000 + Math.random() * 9000));
+    const code = String(Math.floor(100000 + Math.random() * 900000));
     pendingOtp.set(phone, code);
     return { devCode: code }; // "sent" — surfaced in the UI for the demo
   },
@@ -146,7 +146,7 @@ export const mockApi: DrDietApi = {
 
   async requestEmailOtp(email) {
     await delay(600);
-    const code = String(Math.floor(1000 + Math.random() * 9000));
+    const code = String(Math.floor(100000 + Math.random() * 900000));
     pendingEmailOtp.set(email.toLowerCase(), code);
     return { devCode: code }; // "sent" — surfaced in the UI for the demo
   },

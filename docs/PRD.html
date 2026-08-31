@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dr Diet — Product Requirements Document</title>
+<style>
+  :root{
+    --primary:#434E3D; --accent:#E2E573; --bg:#F5EDE1; --surface:#FFFFFF;
+    --muted:#7A8570; --border:#DCD6C8; --danger:#B3462C; --success:#9BA23C;
+    --ink:#2b3227;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  body{ font-family:"Barlow","Helvetica Neue",Arial,sans-serif; color:var(--ink); margin:0; font-size:11px; line-height:1.5; }
+  @page{ size:A4; margin:16mm 15mm 16mm 15mm; }
+
+  h1,h2,h3{ color:var(--primary); font-weight:700; line-height:1.2; }
+  h2{ font-size:16px; margin:0 0 8px; padding-bottom:5px; border-bottom:2px solid var(--accent); }
+  h3{ font-size:12.5px; margin:14px 0 4px; }
+  p{ margin:0 0 7px; }
+  ul{ margin:0 0 8px; padding-left:16px; }
+  li{ margin:0 0 3px; }
+  strong{ color:var(--primary); }
+  section{ margin-bottom:16px; break-inside:avoid; }
+  .small{ font-size:10px; color:var(--muted); }
+
+  .cover{ background:var(--primary); color:#fff; border-radius:14px; padding:26px 28px; margin-bottom:22px; }
+  .cover .eyebrow{ color:var(--accent); font-weight:700; letter-spacing:.14em; font-size:10px; text-transform:uppercase; margin:0 0 8px; }
+  .cover h1{ color:#fff; font-size:30px; margin:0 0 6px; }
+  .cover .tag{ color:#e9e4d6; font-size:13px; margin:0 0 16px; }
+  .meta{ display:flex; flex-wrap:wrap; gap:10px 26px; border-top:1px solid rgba(255,255,255,.2); padding-top:12px; }
+  .meta div{ font-size:10px; color:#cfd3c4; }
+  .meta b{ display:block; color:#fff; font-size:11.5px; font-weight:700; margin-top:1px; }
+
+  .lead{ font-size:12px; color:var(--ink); background:var(--surface); border:1px solid var(--border); border-left:4px solid var(--success); padding:11px 13px; border-radius:8px; }
+
+  table{ width:100%; border-collapse:collapse; margin:6px 0 8px; font-size:10px; }
+  th,td{ text-align:left; padding:6px 8px; border:1px solid var(--border); vertical-align:top; }
+  th{ background:var(--primary); color:#fff; font-weight:600; }
+  tr:nth-child(even) td{ background:#faf7f0; }
+
+  .cols{ display:flex; gap:14px; }
+  .cols > div{ flex:1; }
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:11px 13px; }
+
+  .pill{ display:inline-block; font-size:9px; font-weight:700; padding:2px 8px; border-radius:999px; vertical-align:middle; white-space:nowrap; }
+  .done{ background:var(--success); color:#fff; }
+  .next{ background:var(--accent); color:#4a4a17; }
+  .later{ background:#e7e2d5; color:var(--muted); }
+  .gap{ background:var(--danger); color:#fff; }
+
+  .kpi{ display:flex; gap:10px; }
+  .kpi .card{ flex:1; text-align:center; }
+  .kpi .num{ font-size:20px; font-weight:800; color:var(--primary); }
+  .kpi .lbl{ font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+
+  .flow{ display:flex; align-items:stretch; gap:0; margin:8px 0; }
+  .flow .step{ flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 6px; text-align:center; font-size:9px; font-weight:600; color:var(--primary); }
+  .flow .arrow{ display:flex; align-items:center; font-weight:700; padding:0 4px; color:var(--muted); }
+
+  .target{ background:#fff; border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:8px; padding:10px 13px; margin-top:6px; }
+  .target b{ color:var(--primary); }
+
+  .foot{ margin-top:18px; border-top:1px solid var(--border); padding-top:8px; }
+</style>
+</head>
+<body>
+
+  <div class="cover">
+    <p class="eyebrow">Product Requirements Document</p>
+    <h1>Dr Diet</h1>
+    <p class="tag">“Eat What’s Right” — a healthy meal-subscription app for India</p>
+    <div class="meta">
+      <div>Version<b>2.4</b></div>
+      <div>Date<b>29 Aug 2026</b></div>
+      <div>Status<b>MVP built · backend live (Phase 1)</b></div>
+      <div>Owner<b>Dr Diet Product</b></div>
+      <div>Platform<b>Responsive web (Next.js)</b></div>
+    </div>
+  </div>
+
+  <section>
+    <p class="lead">Dr Diet lets busy professionals in India subscribe to nutritionally-balanced meals delivered on a schedule that fits their life, with minimal planning effort. This document defines the product: who it serves, the end-to-end flow, what is built today, and the requirements and roadmap to a fully live, operationally-automated service. It reflects the current implementation — a complete functional app with a customer storefront, an admin console, and a real Supabase backend — and adds forward requirements for authentication, flexible scheduling, and automated delivery logistics.</p>
+  </section>
+
+  <section>
+    <h2>1 · Product summary &amp; goals</h2>
+    <div class="cols">
+      <div>
+        <h3>What it is</h3>
+        <p>A mobile-first web app where a user discovers meal plans, builds a personalised plan through a guided wizard (or picks a curated plan), checks out with serviceability-aware delivery, pays, and manages an ongoing subscription from a dashboard. An operations-facing admin console manages customers, subscriptions, orders, menu, coupons, payments, reviews and support.</p>
+      </div>
+      <div>
+        <h3>Goals</h3>
+        <ul>
+          <li>Take a first-time visitor from landing to a <strong>confirmed, paid subscription with zero dead ends</strong>.</li>
+          <li>Remove meal-planning effort while keeping nutrition aligned to a fitness goal.</li>
+          <li>Give customers <strong>real scheduling control</strong> — plan ahead or change day-to-day.</li>
+          <li><strong>Automate fulfilment &amp; protect margins</strong> — hands-off delivery at an optimised cost.</li>
+        </ul>
+      </div>
+    </div>
+    <h3>Non-goals (this release)</h3>
+    <p class="small">AI/photo-based body analysis · referral &amp; rewards mechanics · native mobile apps (responsive web first) · in-house rider fleet or route optimisation (we integrate aggregators, not build logistics) · production-grade payment settlement (simulated until Phase 2).</p>
+  </section>
+
+  <section>
+    <h2>2 · Primary persona</h2>
+    <div class="card">
+      <h3 style="margin-top:0">Raj Mehta · 25 · Corporate engineer &amp; gym-goer</h3>
+      <p>Works 8 hrs/day, 5 days/week; gyms 4×/week. Conscious about food for fitness, but unwilling to spend time planning meals. <strong>Trust bar is high, patience is low</strong> — he distrusts new brands and abandons any step that feels like too much commitment before he’s ready.</p>
+      <p style="margin-bottom:0"><strong>Wants:</strong> get fit · meals matched to his goal and macros · spend less time planning · <strong>flexibility to change or skip a day</strong> · <strong>a fast, password-free login</strong>. <strong>Fears:</strong> unclear billing, taste risk, “do they even deliver to me?”, being locked in.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>3 · Journey-driven requirements</h2>
+    <table>
+      <tr><th style="width:15%">Stage</th><th style="width:42%">Raj’s pain point</th><th>Product answer (shipped)</th></tr>
+      <tr><td><strong>Discover</strong></td><td>Doesn’t trust brands; hard to choose among many.</td><td>Home leads with rating/review count, FSSAI &amp; dietitian trust badges, one-line value prop.</td></tr>
+      <tr><td><strong>Explore</strong></td><td>Comparing meals &amp; nutrition is hard; distrusts nutrition facts.</td><td>Explore + side-by-side Compare with calories/protein/carbs/fat; Reviews &amp; FAQs reachable without login.</td></tr>
+      <tr><td><strong>Build plan</strong></td><td>Doesn’t know body stats; unsure of allergies; won’t over-commit.</td><td><strong>Skippable</strong> body-analysis step with a standard calorie target; explicit diet + allergy selection flagged on meal cards; a <strong>Trial</strong> path before full commitment.</td></tr>
+      <tr><td><strong>Checkout</strong></td><td>When do I start? Do they deliver here? Taste risk.</td><td>Serviceability (pincode) checked first, start-date picker with plain first-delivery date, chip + free-text delivery instructions.</td></tr>
+      <tr><td><strong>Payment</strong></td><td>Fear of failure; “too much?”; “does this auto-renew?”</td><td>Itemised ₹ breakdown, <strong>explicit billing-cadence copy</strong>, one-tap coupon, UPI-first methods, success/failure/retry states.</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>4 · Feature scope &amp; status</h2>
+    <table>
+      <tr><th style="width:20%">Area</th><th>Capabilities</th><th style="width:12%">Status</th></tr>
+      <tr><td><strong>Auth &amp; login</strong></td><td>One-time code (OTP) by email or phone; polished code entry (see §5). Delivery of codes needs providers</td><td><span class="pill done">Partial</span></td></tr>
+      <tr><td><strong>Discover</strong></td><td>Home, Explore, Compare, Plan details, This-week’s menu, Reviews, FAQs</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><strong>Plan builder</strong></td><td>Goal → Body (skippable) → Diet → Allergies → Meals → Duration (incl. Trial) → Preferences → Customisation → Summary</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><strong>Checkout</strong></td><td>Serviceability-first address, slot, instructions, start date, coupon, itemised review</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><strong>Payment</strong></td><td>UPI-first method picker, processing, success / failure / retry, confirmation</td><td><span class="pill next">Simulated</span></td></tr>
+      <tr><td><strong>Dashboard</strong></td><td>Today’s meals, skip/pause, change time/address, upgrade, progress, invoices, support, profile</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><strong>Scheduling flexibility</strong></td><td>Plans + skip + pause built; <strong>meal-level</strong> pre-select / daily edit / swap not yet (see §6)</td><td><span class="pill done">Partial</span></td></tr>
+      <tr><td><strong>Delivery &amp; logistics</strong></td><td>Automated aggregator assignment, tracking, POD, rate optimisation — not started (see §7)</td><td><span class="pill gap">Gap</span></td></tr>
+      <tr><td><strong>Admin console</strong></td><td>Dashboard/KPIs, orders, subscriptions, customers, menu, coupons, payments, reviews, support, settings</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><strong>Backend</strong></td><td>Supabase Postgres, auth, Row-Level Security; profiles, subscriptions, orders, invoices persisted</td><td><span class="pill done">Live</span></td></tr>
+    </table>
+    <p class="small"><span class="pill done">Built/Live</span> shipped · <span class="pill next">Simulated</span> functional, not real yet · <span class="pill gap">Gap</span> required, not started · <span class="pill later">Later</span> planned.</p>
+  </section>
+
+  <section>
+    <h2>5 · Authentication &amp; login (requirements)</h2>
+    <p>Password-free, one-time-code sign-in only — fast enough for a low-patience user, with no social logins and no guest checkout. Explore &amp; Compare stay public; a verified account is required to build a plan and order.</p>
+    <table>
+      <tr><th style="width:34%">Requirement</th><th>Detail</th><th style="width:12%">Status</th></tr>
+      <tr><td>OTP by email</td><td>Enter email → receive a 6-digit one-time code → verify.</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td>OTP by phone</td><td>Enter mobile (+91) → receive a 6-digit SMS code → verify.</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td>No passwords / social / guest</td><td>No password, Google, or guest login. Public browsing stays open; sign in to order.</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td>Polished code entry</td><td>Segmented 6-box input with auto-advance, paste, and <strong>auto-verify</strong> on the last digit.</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td>Resend with cooldown</td><td>“Resend code” with a 30-second countdown; change email/number; clear error &amp; loading states.</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td>Auto-provisioned profile</td><td>A profile row is created per new user; each user accesses only their own data (RLS).</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><strong>Email code delivery</strong></td><td>Custom SMTP (e.g. Resend) — built-in email can’t show a code. Production needs a <strong>verified sending domain</strong>.</td><td><span class="pill gap">Provider setup</span></td></tr>
+      <tr><td><strong>Phone code delivery</strong></td><td>An <strong>SMS provider</strong> (e.g. Twilio / MSG91) connected to Supabase Auth.</td><td><span class="pill gap">Provider setup</span></td></tr>
+    </table>
+    <p class="small"><strong>Note:</strong> the login experience is fully built; going live end-to-end only requires connecting the email (SMTP) and SMS providers above — no further app changes.</p>
+  </section>
+
+  <section>
+    <h2>6 · Scheduling flexibility (requirements)</h2>
+    <p>Customers must be able to plan ahead <em>or</em> stay fully day-to-day, without any change ever breaking the underlying subscription or billing. Orders mutate; the subscription and its cadence stay intact.</p>
+    <table>
+      <tr><th style="width:34%">Requirement</th><th>Detail</th><th style="width:12%">Status</th></tr>
+      <tr><td>Weekly / monthly plans</td><td>Subscribe by duration (trial / weekly / monthly / quarterly).</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td>Skip a delivery</td><td>Skip/un-skip an individual day from the dashboard.</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td>Pause / resume</td><td>Pause the whole subscription and resume later.</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><strong>Pre-select meals ahead</strong></td><td>Choose the specific dish for each slot across a week or month in advance.</td><td><span class="pill gap">Required</span></td></tr>
+      <tr><td><strong>Edit meals daily</strong></td><td>Change the dish for a given day up to a daily cut-off, for max flexibility.</td><td><span class="pill gap">Required</span></td></tr>
+      <tr><td><strong>Swap meals</strong></td><td>Substitute one dish for another (within diet/allergy rules) without disrupting the plan.</td><td><span class="pill gap">Required</span></td></tr>
+    </table>
+    <p class="small"><strong>System rule:</strong> weekly/monthly plans, daily changes, skips, pauses and swaps must all operate on the order layer while the subscription record and billing cadence remain unbroken. A cut-off time governs how late an edit is allowed before kitchen lock.</p>
+  </section>
+
+  <section>
+    <h2>7 · Delivery &amp; logistics (requirements)</h2>
+
+    <h3>7.1 · Automated third-party delivery assignment <span class="pill gap">Required · not started</span></h3>
+    <p>Orders must be auto-assigned to a third-party delivery partner via API — <strong>no manual rider booking or follow-ups</strong> from the team.</p>
+    <div class="flow">
+      <div class="step">Order created</div>
+      <div class="arrow">→</div>
+      <div class="step">System calls delivery API</div>
+      <div class="arrow">→</div>
+      <div class="step">Rider auto-allocated</div>
+      <div class="arrow">→</div>
+      <div class="step">Pickup &amp; delivery tracked</div>
+      <div class="arrow">→</div>
+      <div class="step">Proof of delivery captured</div>
+    </div>
+
+    <h3>7.2 · Optimised delivery pricing to protect margins <span class="pill gap">Required · not started</span></h3>
+    <p>Delivery must not erode meal margins. Today it is a flat fee with no optimisation; the requirement is a multi-aggregator, rate-aware routing layer.</p>
+    <ul>
+      <li><strong>Multiple aggregators</strong> — integrate several partners, no single locked-in provider.</li>
+      <li><strong>Rate optimisation</strong> — compute cost by distance, order volume, and time of day.</li>
+      <li><strong>Cheapest-reliable routing</strong> — route each order to the best-value dependable partner, per order.</li>
+    </ul>
+    <div class="target">
+      <b>Cost target:</b> current ~<b>₹120 for 7 km</b> ≈ <b>48%</b> of a ₹250 meal (unsustainable) → bring the effective 7 km cost to <b>₹60–80</b>, depending on city and volume.
+    </div>
+  </section>
+
+  <section>
+    <h2>8 · Technical architecture</h2>
+    <div class="cols">
+      <div>
+        <h3>Stack</h3>
+        <ul>
+          <li><strong>Next.js 16</strong> (App Router) · <strong>React 19</strong> · <strong>TypeScript</strong></li>
+          <li><strong>Tailwind CSS v4</strong> — CSS-first theming via <span class="small">@theme</span> tokens</li>
+          <li>Fonts: Barlow + Baloo 2 (accent stand-in) · Hosting: Vercel</li>
+        </ul>
+        <h3>The swappable data seam</h3>
+        <p>All stateful operations go through a single <strong>DrDietApi</strong> interface. A localStorage mock is the zero-config default; the <strong>Supabase adapter activates automatically</strong> when environment keys are present — no UI code changes. The same seam is where delivery-partner and payment providers plug in.</p>
+      </div>
+      <div>
+        <h3>Backend &amp; security</h3>
+        <ul>
+          <li><strong>Supabase Postgres</strong>, schema mirrors the data model (INR-only, no beef).</li>
+          <li><strong>Row-Level Security</strong>: catalog world-readable; users access only their own data.</li>
+          <li><strong>Auth</strong>: one-time code (OTP) by email or phone only (see §5).</li>
+        </ul>
+        <h3>Planned integration surfaces</h3>
+        <p class="small"><strong>Messaging:</strong> SMTP (Resend) for email codes + verified domain; SMS provider for phone codes. <strong>Payments:</strong> Razorpay (order + webhook, UPI Autopay). <strong>Delivery:</strong> a routing service fanning out to multiple aggregator APIs, with webhooks for tracking &amp; proof-of-delivery.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>9 · Constraints (non-negotiable)</h2>
+    <div class="kpi">
+      <div class="card"><div class="num">₹</div><div class="lbl">INR only — no AED / USD / $ anywhere</div></div>
+      <div class="card"><div class="num">0</div><div class="lbl">Beef references — in menu, data or copy</div></div>
+      <div class="card"><div class="num">1</div><div class="lbl">Fixed brand system — tokens, no ad-hoc hex</div></div>
+      <div class="card"><div class="num">0</div><div class="lbl">Dead-end CTAs — every action navigates</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>10 · Success criteria &amp; metrics</h2>
+    <div class="cols">
+      <div>
+        <h3>Acceptance</h3>
+        <ul>
+          <li>Home → confirmed paid subscription with no dead-end click.</li>
+          <li>A user signs in with an emailed/texted OTP and a purchase persists to the backend, visible across devices and in admin.</li>
+          <li>A customer can pre-plan a week and also change/skip/swap a single day without breaking billing.</li>
+          <li>An order auto-allocates a rider and captures proof of delivery with no manual step.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Product &amp; ops metrics</h3>
+        <ul>
+          <li>OTP request → verify success rate; time-to-sign-in</li>
+          <li>Builder completion &amp; checkout conversion; Trial → paid</li>
+          <li>Payment success rate; involuntary churn from failed renewals</li>
+          <li>Pause/skip/swap rate, MRR; <strong>delivery cost per order</strong> &amp; % of meal price; on-time &amp; POD rate</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>11 · Roadmap</h2>
+    <table>
+      <tr><th style="width:13%">Phase</th><th style="width:20%">Theme</th><th>Scope</th><th style="width:11%">Status</th></tr>
+      <tr><td><strong>Phase 1</strong></td><td>Real backend &amp; login</td><td>Supabase Postgres + auth + RLS; persist profile, subscription, orders, invoices; OTP login by email + phone with polished code entry.</td><td><span class="pill done">Done</span></td></tr>
+      <tr><td><strong>Phase 2</strong></td><td>Providers, payments &amp; ops</td><td>Connect SMTP (email codes) + SMS (phone codes); Razorpay order + webhook (activate on confirmed payment); UPI Autopay; repoint admin to Supabase.</td><td><span class="pill next">Next</span></td></tr>
+      <tr><td><strong>Phase 3</strong></td><td>Flexible scheduling</td><td>Meal-level control: pre-select a week/month, daily edit &amp; swap with cut-off, on the order layer; scheduled renewals &amp; rolling order generation; notifications.</td><td><span class="pill later">Planned</span></td></tr>
+      <tr><td><strong>Phase 4</strong></td><td>Delivery &amp; logistics</td><td>Multi-aggregator delivery integration; auto rider allocation; live tracking + proof-of-delivery; rate-optimised cheapest-reliable routing (7 km → ₹60–80).</td><td><span class="pill later">Planned</span></td></tr>
+      <tr><td><strong>Later</strong></td><td>Growth</td><td>AI/photo body analysis; referral &amp; rewards; audience landing pages; native wrappers.</td><td><span class="pill later">Backlog</span></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>12 · Open items &amp; risks</h2>
+    <ul>
+      <li><strong>OTP delivery not live</strong> — login UX is built, but email codes need custom SMTP (+ verified domain) and phone codes need an SMS provider before anyone can actually sign in on production (§5).</li>
+      <li><strong>Payments are simulated</strong> — no money moves until Razorpay (Phase 2).</li>
+      <li><strong>Meal-level flexibility missing</strong> — pre-select / daily edit / swap not built; meals are auto-assigned today (§6).</li>
+      <li><strong>No delivery automation</strong> — order status is set manually in admin; no aggregator API, tracking, or POD (§7.1).</li>
+      <li><strong>Delivery cost unoptimised</strong> — flat fee, no multi-aggregator routing; ~48% of meal price today vs. ₹60–80 target (§7.2).</li>
+    </ul>
+    <p class="foot small">Dr Diet — Product Requirements Document · v2.4 · Confidential. Currency is INR (₹) throughout. No beef in any menu item, protein option, or data.</p>
+  </section>
+
+</body>
+</html>
